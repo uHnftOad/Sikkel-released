@@ -3,7 +3,7 @@
 -- Many example programs dealing with streams (guarded and standard)
 --------------------------------------------------
 
-module Applications.GuardedRecursion.StreamsExamples where
+module Applications.CombiningFeatures.StreamsExamples where
 
 open import Data.Bool
 open import Data.Nat
@@ -16,13 +16,13 @@ open import Model.Modality renaming (⟨_∣_⟩ to ′⟨_∣_⟩) using ()
 open import Model.Type.Discrete renaming (Nat' to ′Nat'; Bool' to ′Bool')
 open import Model.Type.Function hiding (lam; lam[_∈_]_) renaming (_⇛_ to _′⇛_)
 open import Model.Type.Product hiding (pair; fst; snd) renaming (_⊠_ to _′⊠_)
-open import Applications.GuardedRecursion.Model.Modalities
+open import Applications.CombiningFeatures.Model.Modalities
   hiding (next; löb; lift▻; lift2▻; 𝟙≤later) renaming (▻ to ′▻; constantly to ′constantly; forever to ′forever; later to ′later)
-open import Applications.GuardedRecursion.Model.Streams.Guarded hiding (g-cons; g-head; g-tail) renaming (GStream to ′GStream)
-open import Applications.GuardedRecursion.Model.Streams.Standard renaming (Stream' to ′Stream')
+open import Applications.CombiningFeatures.Model.Streams.Guarded hiding (g-cons; g-head; g-tail) renaming (GStream to ′GStream)
+open import Applications.CombiningFeatures.Model.Streams.Standard renaming (Stream' to ′Stream')
 open import Extraction
 
-open import Applications.GuardedRecursion.MSTT
+open import Applications.CombiningFeatures.MSTT
 
 
 --------------------------------------------------

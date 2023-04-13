@@ -21,16 +21,26 @@ private
 CtxOp : BaseCategory → BaseCategory → Set₁
 CtxOp C D = Ctx C → Ctx D
 
+-- Describes the action of a functor on morphisms and proofs of associated properties
 record IsCtxFunctor (Φ : CtxOp C D) : Set₁ where
   no-eta-equality
   field
     ctx-map : {Δ Γ : Ctx C} → Δ ⇒ Γ → Φ Δ ⇒ Φ Γ
+      {-
+        The action of functor Φ on the morphisms of Psh(C)
+
+        If f : x → y, then Φ(f) : Φ(x) → Φ(y).
+      -}
     ctx-map-cong : {Δ Γ : Ctx C} {σ τ : Δ ⇒ Γ} → σ ≅ˢ τ → ctx-map σ ≅ˢ ctx-map τ
+      -- The action of Φ on the morphisms respects equivalence of morphisms in Psh(C).
     ctx-map-id : {Γ : Ctx C} → ctx-map (id-subst Γ) ≅ˢ id-subst (Φ Γ)
+      -- The action of Φ on the morphisms preserves identity morphisms.
     ctx-map-⊚ : {Δ Γ Θ : Ctx C} →
                  (τ : Γ ⇒ Θ) (σ : Δ ⇒ Γ) →
                  ctx-map (τ ⊚ σ) ≅ˢ ctx-map τ ⊚ ctx-map σ
+      -- The action of Φ on the morphisms commutes with the composition operation of Psh(C).
 
+  -- If τ is a left inverse of σ, then `ctx-map τ` is a left inverse of `ctx-map σ`. 
   ctx-map-inverse : {Δ Γ : Ctx C} {σ : Δ ⇒ Γ} {τ : Γ ⇒ Δ} →
                     τ ⊚ σ ≅ˢ id-subst Δ → ctx-map τ ⊚ ctx-map σ ≅ˢ id-subst (Φ Δ)
   ctx-map-inverse {Δ = Δ} {σ = σ} {τ = τ} e = begin
@@ -45,6 +55,7 @@ record IsCtxFunctor (Φ : CtxOp C D) : Set₁ where
 
 open IsCtxFunctor {{...}} public
 
+-- A proof that identity functors are indeed functors
 instance
   id-is-ctx-functor : ∀ {C} → IsCtxFunctor {C = C} (λ Γ → Γ)
   ctx-map {{id-is-ctx-functor}} σ = σ
@@ -52,6 +63,7 @@ instance
   ctx-map-id {{id-is-ctx-functor}} = ≅ˢ-refl
   ctx-map-⊚ {{id-is-ctx-functor}} _ _ = ≅ˢ-refl
 
+-- skipped: 
 -- This operation is not made available for instance resolution because otherwise
 --   there would be infinitely many instances of IsCtxFunctor for any context
 --   operation (by pre- or postcomposition with the identity operation).
@@ -66,13 +78,22 @@ ctx-map-⊚ {{composed-functor φ ψ}} τ σ = ≅ˢ-trans (ctx-map-cong {{φ}} 
 record CtxFunctor (C D : BaseCategory) : Set₁ where
   no-eta-equality
   field
+    {-
+      `ctx-op` descirbes a context functor's action on the contexts/objects of Psh(C), whereas information about its action on the substitutions/morphisms of Psh(C) is contained in `is-functor`. 
+    -}
     ctx-op : CtxOp C D
+      -- The action of a functor on the contexts of Psh(C)
     is-functor : IsCtxFunctor ctx-op
+      -- A proof that ctx-op is indeed a functor
 
   ctx-fmap = ctx-map {{is-functor}}
+    -- The action of this functor on the morphisms of Psh(C)
   ctx-fmap-cong = ctx-map-cong {{is-functor}}
+    -- The action of this functor on the morphisms respects equivalence of substituions of Psh(C).
   ctx-fmap-id = ctx-map-id {{is-functor}}
+    -- The action of this functor on the morphisms preserves identity morphisms.
   ctx-fmap-⊚ = ctx-map-⊚ {{is-functor}}
+    -- The action of this functor on the morphisms commutes with the composition operation of Psh(C).
   ctx-fmap-inverse = ctx-map-inverse {{is-functor}}
 
 open CtxFunctor public
@@ -81,10 +102,12 @@ id-ctx-functor : CtxFunctor C C
 ctx-op id-ctx-functor = λ Γ → Γ
 is-functor id-ctx-functor = id-is-ctx-functor
 
+-- Composition of context functors
 _ⓕ_ : ∀ {C1 C2 C3} → CtxFunctor C2 C3 → CtxFunctor C1 C2 → CtxFunctor C1 C3
 ctx-op (Φ ⓕ Ψ) = λ Γ → ctx-op Φ (ctx-op Ψ Γ)
 is-functor (Φ ⓕ Ψ) = composed-functor (is-functor Φ) (is-functor Ψ)
 
+-- Composition of context functors respctects equivalence of contexts
 ctx-functor-cong : (F : CtxFunctor C D) {Γ Δ : Ctx C} → Γ ≅ᶜ Δ → ctx-op F Γ ≅ᶜ ctx-op F Δ
 from (ctx-functor-cong F Γ=Δ) = ctx-fmap F (from Γ=Δ)
 to (ctx-functor-cong F Γ=Δ) = ctx-fmap F (to Γ=Δ)
@@ -100,6 +123,18 @@ record CtxNatTransf (Φ Ψ : CtxFunctor C D) : Set₁ where
   field
     transf-op : (Γ : Ctx C) → ctx-op Φ Γ ⇒ ctx-op Ψ Γ
     naturality : ∀ {Δ Γ} (σ : Δ ⇒ Γ) → transf-op Γ ⊚ ctx-fmap Φ σ ≅ˢ ctx-fmap Ψ σ ⊚ transf-op Δ
+      {-
+        σ : Δ ⇒ Γ : Hom (Ctx C) Δ Γ @ Ctx C
+
+        @ Ctx D : 
+                           ϕ(σ)
+                  ϕ(Γ) ←----------- ϕ(Δ)
+                    ║                 ║
+        transf-op Γ ║                 ║ transf-op Δ
+                    ⇓                 ⇓
+                  ψ(Γ) ←----------- ψ(Δ)
+                           ψ(σ)
+      -}
 
 open CtxNatTransf public
 

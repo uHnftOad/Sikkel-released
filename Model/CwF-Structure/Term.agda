@@ -35,6 +35,11 @@ record Tm (Γ : Ctx C) (T : Ty Γ) : Set where
     term : (x : Ob) (γ : Γ ⟨ x ⟩) → T ⟨ x , γ ⟩
     naturality : ∀ {x y} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} (f : Hom x y) (eγ : Γ ⟪ f ⟫ γy ≡ γx) →
                  T ⟪ f , eγ ⟫ (term y γy) ≡ term x γx
+      {-
+        T ⟨ x , γx ⟩ ←--------------------- T ⟨ y , γy ⟩
+                           T ⟪ f , eγ ⟫_
+        t ⟨ x , γx ⟩' ←-------------------| t ⟨ y , γy ⟩'
+      -}
 open Tm public renaming (term to infix 15 _⟨_,_⟩')
 
 private
@@ -46,11 +51,13 @@ private
 --------------------------------------------------
 -- Equivalence of terms
 
+-- Two terms are equivant if they are pointwise equivalent. 
 record _≅ᵗᵐ_ {Γ : Ctx C} {T : Ty Γ} (t s : Tm Γ T) : Set where
   field
     eq : ∀ {x} γ → t ⟨ x , γ ⟩' ≡ s ⟨ x , γ ⟩'
 open _≅ᵗᵐ_ public
 
+-- Properties of equivalence of terms
 ≅ᵗᵐ-refl : t ≅ᵗᵐ t
 eq ≅ᵗᵐ-refl _ = refl
 
@@ -108,6 +115,7 @@ convert-term-cong : (η : T ↣ S) → t ≅ᵗᵐ t' →
                     convert-term η t ≅ᵗᵐ convert-term η t'
 eq (convert-term-cong η t=t') γ = cong (func η) (eq t=t' γ)
 
+-- Right-to-left typing judgement conversion
 ι[_]_ : T ≅ᵗʸ S → Tm Γ S → Tm Γ T
 ι[ T=S ] s = convert-term (to T=S) s
 
@@ -126,6 +134,7 @@ eq (ι-symˡ T=S s) γ = eq (isoʳ T=S) (s ⟨ _ , γ ⟩')
          ι[ T=S ] (ι[ ≅ᵗʸ-sym T=S ] t) ≅ᵗᵐ t
 eq (ι-symʳ T=S t) γ = eq (isoˡ T=S) (t ⟨ _ , γ ⟩')
 
+-- Left-to-right typing judgement conversion
 ι⁻¹[_]_ : T ≅ᵗʸ S → Tm Γ T → Tm Γ S
 ι⁻¹[ T=S ] t = ι[ ≅ᵗʸ-sym T=S ] t
 
@@ -141,6 +150,9 @@ eq (ι-trans T=S S=R r) γ = refl
 --------------------------------------------------
 -- Substitution of terms
 
+-- Difference between `ι[_]_` and `_[_]'`:
+--  `ι[_]_` : same context, "equal" types
+--  `_[_]'` : different context, "almost equal" types
 _[_]' : Tm Γ T → (σ : Δ ⇒ Γ) → Tm Δ (T [ σ ])
 t [ σ ]' ⟨ x , δ ⟩' = t ⟨ x , func σ δ ⟩'
 naturality (t [ σ ]') f eγ = naturality t f _

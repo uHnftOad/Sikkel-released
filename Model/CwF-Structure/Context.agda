@@ -7,10 +7,10 @@ module Model.CwF-Structure.Context where
 open import Data.Unit using (⊤; tt)
 open import Function using (id; _∘_)
 open import Relation.Binary.PropositionalEquality hiding ([_]; naturality)
+open import Data.Product using (Σ; Σ-syntax; _×_; proj₁; proj₂) renaming (_,_ to [_,_])
 
 open import Model.BaseCategory
 open import Model.Helpers
-
 
 --------------------------------------------------
 -- Definition of contexts and substitutions as presheaves over C
@@ -25,8 +25,20 @@ record Ctx (C : BaseCategory) : Set₁ where
     ctx-cell : Ob → Set
     ctx-hom : ∀ {x y} → Hom x y → ctx-cell y → ctx-cell x
     ctx-id : ∀ {x} {γ : ctx-cell x} → ctx-hom hom-id γ ≡ γ
+      {-
+        Γ ⟪ hom-id C {x} ⟫ : Γ ⟨ x ⟩ → Γ ⟨ x ⟩    
+        γ : Γ ⟨ x ⟩ 
+        ---------------------------------------
+        Γ ⟪ hom-id C {x} ⟫ γ = γ
+      -}
     ctx-comp : ∀ {x y z} {f : Hom x y} {g : Hom y z} {γ : ctx-cell z} →
                ctx-hom (g ∙ f) γ ≡ ctx-hom f (ctx-hom g γ)
+      {-
+                  Γ ⟪ f ⟫_           Γ ⟪ g ⟫_
+        Γ ⟨ x ⟩ ←--------- Γ ⟨ y ⟩ ←--------- Γ ⟨ z ⟩ ∋ γ 
+        Γ ⟨ x ⟩ ←----------------------------- Γ ⟨ z ⟩ ∋ γ
+                          Γ ⟪ g ∙ f ⟫_
+      -}
 open Ctx public renaming (ctx-cell to _⟨_⟩; ctx-hom to _⟪_⟫_)
 
 module _ {C : BaseCategory} where
@@ -65,6 +77,18 @@ module _ {C : BaseCategory} where
     field
       func : ∀ {x} → Δ ⟨ x ⟩ → Γ ⟨ x ⟩
       naturality : ∀ {x y} {f : Hom x y} {δ : Δ ⟨ y ⟩} → Γ ⟪ f ⟫ (func δ) ≡ func (Δ ⟪ f ⟫ δ)
+        {-
+                              f
+                    x ------------------> y
+
+                          Δ ⟪ f ⟫_
+               Δ ⟨ x ⟩ ←----------- Δ ⟨ y ⟩ ∋ δ
+                   ∣                    ∣
+          func {x} ∣                    ∣ func {y}
+                   ↓                    ↓
+               Γ ⟨ x ⟩ ←----------- Γ ⟨ y ⟩
+                          Γ ⟪ f ⟫_
+        -}
   open _⇒_ public
 
   id-subst : (Γ : Ctx C) → Γ ⇒ Γ
@@ -92,8 +116,10 @@ module _ {C : BaseCategory} where
   record _≅ˢ_ {Δ : Ctx C} {Γ : Ctx C} (σ τ : Δ ⇒ Γ) : Set where
     field
       eq : ∀ {x} δ → func σ {x} δ ≡ func τ δ
+        -- δ : Δ ⟨ x ⟩
   open _≅ˢ_ public
 
+  -- Properties of equivalence of substitutions
   ≅ˢ-refl : {σ : Δ ⇒ Γ} → σ ≅ˢ σ
   eq ≅ˢ-refl _ = refl
 
@@ -161,5 +187,46 @@ module _ {C : BaseCategory} where
   func (!◇ Γ) _ = tt
   naturality (!◇ Γ) = refl
 
+  -- A proof that ◇ is indeed terminal
   ◇-terminal : (Γ : Ctx C) (σ τ : Γ ⇒ ◇) → σ ≅ˢ τ
   eq (◇-terminal Γ σ τ) _ = refl
+
+--------------------------------------------------
+-- Functions related to contexts over a product base category C ⊗ D
+
+-- Fix an object c in C and take the projection of a context over C ⊗ D along with c
+fixˡ : ∀ {C D} → Ctx (C ⊗ D) → BaseCategory.Ob C → Ctx D
+fixˡ Γ c ⟨ d ⟩ = Γ ⟨ [ c , d ] ⟩
+fixˡ {C = C} Γ c ⟪ g ⟫ γ = Γ ⟪ [ BaseCategory.hom-id C {c} , g ] ⟫ γ
+ctx-id (fixˡ Γ c) = ctx-id Γ
+ctx-comp (fixˡ {C = C} Γ c) {γ = γ} = trans (cong (Γ ⟪_⟫ γ) (×-≡,≡→≡ [ sym (BaseCategory.hom-idˡ C) , refl ])) (ctx-comp Γ)
+
+
+-- Fix an object d in D and take the projection of a context over C ⊗ D along with d
+fixʳ : ∀ {C D} → Ctx (C ⊗ D) → BaseCategory.Ob D → Ctx C
+fixʳ Γ d ⟨ c ⟩ = Γ ⟨ [ c , d ] ⟩
+fixʳ {D = D} Γ d ⟪ f ⟫ γ = Γ ⟪ [ f , BaseCategory.hom-id D {d} ] ⟫ γ
+ctx-id (fixʳ Γ d) = ctx-id Γ
+ctx-comp (fixʳ {D = D} Γ d) {γ = γ} = trans (cong (Γ ⟪_⟫ γ) (×-≡,≡→≡ [ refl , sym (BaseCategory.hom-idˡ D) ])) (ctx-comp Γ)
+
+-- Alternative syntax of fixʳ and fixˡ
+-- `ˡ` and `ʳ` indicate which of the left and right categories is being fixed
+_⟨_⟩ˡ : ∀ {C D} → Ctx (C ⊗ D) → BaseCategory.Ob C  → Ctx D
+Γ ⟨ c ⟩ˡ = fixˡ Γ c
+
+_⟨_⟩ʳ : ∀ {C D} → Ctx (C ⊗ D) → BaseCategory.Ob D → Ctx C
+Γ ⟨ d ⟩ʳ = fixʳ Γ d
+
+-- Given a morphism f : c₁ → c₂ in C, construct a subsitution from Γ ⟨ c₂ ⟩ˡ to Γ ⟨ c₁ ⟩ˡ
+const-substˡ : ∀ {C D} {c₁ c₂ : BaseCategory.Ob C} → (Γ : Ctx (C ⊗ D)) → (BaseCategory.Hom C c₁ c₂) → Γ ⟨ c₂ ⟩ˡ ⇒ Γ ⟨ c₁ ⟩ˡ
+func (const-substˡ {D = D} Γ f) = Γ ⟪ [ f , BaseCategory.hom-id D ] ⟫_
+naturality (const-substˡ {C} {D} Γ f) {f = g} {δ = δ} = trans (sym (ctx-comp Γ))
+                                                        (trans (cong (Γ ⟪_⟫ δ) (×-≡,≡→≡ [ BaseCategory.hom-idⁱ C , BaseCategory.hom-idᵒ D ]))
+                                                               (ctx-comp Γ))
+
+-- Given a morphism g : d₁ → d₂ in D, construct a subsitution from Γ ⟨ d₂ ⟩ʳ to Γ ⟨ d₁ ⟩ʳ
+const-substʳ : ∀ {C D} {d₁ d₂ : BaseCategory.Ob D} → (Γ : Ctx (C ⊗ D)) → (BaseCategory.Hom D d₁ d₂) → Γ ⟨ d₂ ⟩ʳ ⇒ Γ ⟨ d₁ ⟩ʳ
+func (const-substʳ {C = C} Γ g) = Γ ⟪ [ BaseCategory.hom-id C , g ] ⟫_
+naturality (const-substʳ {C} {D} Γ g) {f = f} {δ = δ} = trans (sym (ctx-comp Γ))
+                                                        (trans (cong (Γ ⟪_⟫ δ) (×-≡,≡→≡ [ BaseCategory.hom-idᵒ C , BaseCategory.hom-idⁱ D ]))
+                                                               (ctx-comp Γ))

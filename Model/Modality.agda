@@ -31,40 +31,84 @@ record Modality (C D : BaseCategory) : Set₁ where
 
   lock : CtxOp D C
   lock = ctx-op ctx-functor
+    {-
+        The action of this modality on the objects (i.e., contexts) of Psh(D)
+      
+      Ctx D → Ctx C
+      with shorthand `Γ ,lock⟨ μ ⟩ = lock μ Γ`
+    -}
 
   lock-fmap : {Δ Γ : Ctx D} → (Δ ⇒ Γ) → (lock Δ ⇒ lock Γ)
   lock-fmap = ctx-fmap ctx-functor
+    -- The action of this modality on the morphisms (i.e., substiutions) of Psh(D)
 
   lock-fmap-cong = ctx-fmap-cong ctx-functor
+    -- The action of this modality on the morphisms respects equivalence of substituions.
   lock-fmap-id = ctx-fmap-id ctx-functor
+    -- The action of this modality on the morphisms preserves identity morphisms.
   lock-fmap-⊚ = ctx-fmap-⊚ ctx-functor
+    -- The action of this modlaity on the morphisms commutes with the morphism/substitution composition of Psh(C).
 
   field
     ⟨_∣_⟩ : {Γ : Ctx D} → Ty (lock Γ) → Ty Γ
+      {-
+        The action of this modality on types
+
+        Γ ,lock⟨ μ ⟩ ⊢ A type @ C
+        --------------------------- TP/MODAL
+        Γ ⊢ ⟨μ ∣ A⟩ type @ D
+      -}
     mod-cong : {Γ : Ctx D} {T S : Ty (lock Γ)} →
                T ≅ᵗʸ S → ⟨_∣_⟩ T ≅ᵗʸ ⟨_∣_⟩ S
+      -- The action of this modality on types respects equivalence of types.
     mod-natural : {Δ : Ctx D} {Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} →
                   (⟨_∣_⟩ T) [ σ ] ≅ᵗʸ ⟨_∣_⟩ (T [ lock-fmap σ ])
+      -- The action of this modality on types commutes with type substitutions
 
     mod-intro : {Γ : Ctx D} {T : Ty (lock Γ)} → Tm (lock Γ) T → Tm Γ (⟨_∣_⟩ T)
+      -- The action of this modality on terms
+        -- μ : C → D    lock(Γ) ⊢ t : T
+        -- ----------------------------- TM/MODAL-INTRO
+        -- Γ ⊢ mod-intro(t) : ⟨μ ∣ T⟩
     mod-intro-cong : {Γ : Ctx D} {T : Ty (lock Γ)} {t t' : Tm (lock Γ) T} →
                      t ≅ᵗᵐ t' → mod-intro t ≅ᵗᵐ mod-intro t'
+      -- The action of this modality on terms respects equivalence of terms.
+        -- μ : C → D    lock(Γ) ⊢ t t' : T    t ≅ᵗᵐ t'
+        -- -------------------------------------------------------------------------
+        -- Γ ⊢ mod-intro(t) mod-intro(t) : ⟨μ ∣ T⟩    mod-intro t ≅ᵗᵐ mod-intro t'
     mod-intro-natural : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} (t : Tm (lock Γ) T) →
                         (mod-intro t) [ σ ]' ≅ᵗᵐ ι[ mod-natural σ ] mod-intro (t [ lock-fmap σ ]')
+      -- todo: ^ The action of this modality on terms commutes with term substitutions
     mod-intro-ι : {Γ : Ctx D} {T S : Ty (lock Γ)} (T=S : T ≅ᵗʸ S) (t : Tm (lock Γ) S) →
                   ι[ mod-cong T=S ] mod-intro t ≅ᵗᵐ mod-intro (ι[ T=S ] t)
+      -- The action of this modality on terms commutes with term constructors `mod-intro` and ι[_]_
+        -- Γ ⊢ mod-cong T=S : ⟨_∣ T⟩ ≅ᵗʸ ⟨_∣ S⟩
+        -- Γ ⊢ mod-intro t : ⟨_ ∣ T⟩
+        -- Γ ⊢ ι[ mod-cong T=S ] mod-intro t : Tm Γ ⟨_∣ S⟩
+        -- lock Γ ⊢ ι[ T=S ] t : Tm (lock Γ) S
+        -- Γ ⊢ mod-intro (ι[ T=S ] t) : Tm Γ ⟨_∣ S⟩
 
     mod-elim : {Γ : Ctx D} {T : Ty (lock Γ)} → Tm Γ (⟨_∣_⟩ T) → Tm (lock Γ) T
+      -- An elimination rule for terms
+        -- Γ ⊢ t : ⟨_∣ T⟩
+        -- --------------
+        -- lock Γ ⊢ mod-elim t : T
     mod-elim-cong : {Γ : Ctx D} {T : Ty (lock Γ)} {t t' : Tm Γ (⟨_∣_⟩ T)} →
                     t ≅ᵗᵐ t' → mod-elim t ≅ᵗᵐ mod-elim t'
     -- Naturality of mod-elim and the fact that it commutes with ι can be proved
     -- from mod-intro-natural, mod-intro-ι  and the β and η laws (see below).
+    -- The elimination rule for terms respects equivalence of terms.
 
     mod-β : {Γ : Ctx D} {T : Ty (lock Γ)} (t : Tm (lock Γ) T) →
             mod-elim (mod-intro t) ≅ᵗᵐ t
+      -- A β-rule
+      -- If `lock Γ ⊢ t : T`, then `mod-elim (mod-intro t)` and `t` should be literally the same. 
     mod-η : {Γ : Ctx D} {T : Ty (lock Γ)} (t : Tm Γ (⟨_∣_⟩ T)) →
             mod-intro (mod-elim t) ≅ᵗᵐ t
+      -- An η-rule
+      -- If `Γ ⊢ t : ⟨_∣ T⟩`, then `mod-intro (mod-elim t)` and `t` should be literally the same. 
 
+  -- todo: understand
   mod-elim-natural : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} (t : Tm Γ (⟨_∣_⟩ T)) →
                      (mod-elim t) [ lock-fmap σ ]' ≅ᵗᵐ mod-elim (ι⁻¹[ mod-natural σ ] (t [ σ ]'))
   mod-elim-natural σ t = begin
@@ -93,9 +137,11 @@ record Modality (C D : BaseCategory) : Set₁ where
 
 open Modality public
 
+-- Syntax
 _,lock⟨_⟩ : Ctx D → Modality C D → Ctx C
 Γ ,lock⟨ μ ⟩ = lock μ Γ
 
+-- Modalities map closed types to closed types.
 mod-closed : {μ : Modality C D} {T : ClosedTy C} {{_ : IsClosedNatural T}} → IsClosedNatural ⟨ μ ∣ T ⟩
 IsClosedNatural.closed-natural (mod-closed {μ = μ} {T = T}) σ =
   ≅ᵗʸ-trans (mod-natural μ σ) (mod-cong μ (closed-natural {U = T} (ctx-fmap (ctx-functor μ) σ)))
@@ -103,7 +149,7 @@ IsClosedNatural.closed-natural (mod-closed {μ = μ} {T = T}) σ =
 
 --------------------------------------------------
 -- Properties of modalities with respect to functions, products, ...
-
+-- skipped: 
 module _ (μ : Modality C D) {Γ : Ctx D} where
 
   module _ {T S : Ty (Γ ,lock⟨ μ ⟩)} where
@@ -234,9 +280,35 @@ mod-η (μ ⓜ ρ) t = ≅ᵗᵐ-trans (mod-intro-cong μ (mod-η ρ _)) (mod-η
 record _≅ᵐ_  {C D} (μ ρ : Modality C D) : Set₁ where
   field
     eq-lock : (Γ : Ctx D) → Γ ,lock⟨ μ ⟩ ≅ᶜ Γ ,lock⟨ ρ ⟩
+      {-
+        > from (eq-lock _ Γ) : Γ ,lock⟨ μ ⟩ ⇒ Γ ,lock⟨ ρ ⟩
+        > to (eq-lock _ Γ) : Γ ,lock⟨ ρ ⟩ ⇒ Γ ,lock⟨ μ ⟩
+        > isoˡ (eq-lock _) : (to (eq-lock _ Γ)) ⊚ (from (eq-lock _ Γ)) ≅ˢ id-subst (Γ ,lock⟨ μ ⟩)
+        > isoʳ (eq-lock _) : (from (eq-lock _ Γ)) ⊚ (to (eq-lock _ Γ)) ≅ˢ id-subst (Γ ,lock⟨ ρ ⟩)
+      -}
     eq-lock-natural-to : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) →
                          to (eq-lock Γ) ⊚ lock-fmap ρ σ ≅ˢ lock-fmap μ σ ⊚ to (eq-lock Δ)
+      {-
+                                 lock-fmap ρ σ
+                 Δ ,lock⟨ ρ ⟩ ====================⇒ Γ ,lock⟨ ρ ⟩   
+                       ║                                 ║
+        to (eq-lock Δ) ║                                 ║ to (eq-lock Γ)
+                       ⇓                                 ⇓ 
+                 Δ ,lock⟨ μ ⟩ ====================⇒ Γ ,lock⟨ μ ⟩ 
+                                   lock-fmap μ σ
+                                   
+        lock-fmap ρ σ = ctx-map {{is-functor (ctx-functor ρ)}} σ 
+      -}
     eq-mod-tyʳ : {Γ : Ctx D} (T : Ty (Γ ,lock⟨ μ ⟩)) → ⟨ μ ∣ T ⟩ ≅ᵗʸ ⟨ ρ ∣ T [ to (eq-lock Γ) ] ⟩
+      {-
+        Γ ,lock⟨ ρ ⟩ ⊢ T [ to (eq-lock Γ) ] @ C
+            ║
+            ║ to (eq-lock Γ)
+            ⇓
+        Γ ,lock⟨ μ ⟩ ⊢ T @ C
+        -----------------------------------------------------
+        Γ ⊢ ⟨ μ ∣ T ⟩ ≅ᵗʸ ⟨ ρ ∣ T [ to (eq-lock Γ) ] ⟩ @ D
+      -}
 
     -- In the future, we will probably need an equivalence requirement for the modal term former,
     --  such as the following. For simplicity, we currently omit this.
@@ -276,6 +348,9 @@ record _≅ᵐ_  {C D} (μ ρ : Modality C D) : Set₁ where
     ⟨ ρ ∣ T ⟩ ∎
     where open ≅ᵗʸ-Reasoning
 
+  {-
+    todo: what does the `{Γ ,lock⟨ μ ⟩}` part mean? 
+  -}
   eq-mod-closed : (A : ClosedTy C) {{_ : IsClosedNatural A}} {Γ : Ctx D} → ⟨ μ ∣ A {Γ ,lock⟨ μ ⟩} ⟩ ≅ᵗʸ ⟨ ρ ∣ A ⟩
   eq-mod-closed A = begin
     ⟨ μ ∣ A ⟩
@@ -287,6 +362,7 @@ record _≅ᵐ_  {C D} (μ ρ : Modality C D) : Set₁ where
 
 open _≅ᵐ_ public
 
+-- Properties of equivalence of modalities
 ≅ᵐ-refl : ∀ {C D} → {μ : Modality C D} → μ ≅ᵐ μ
 eq-lock (≅ᵐ-refl {μ = μ}) Γ = ≅ᶜ-refl
 eq-lock-natural-to (≅ᵐ-refl {μ = μ}) σ = ≅ˢ-trans (⊚-id-substˡ _) (≅ˢ-sym (⊚-id-substʳ _))
@@ -394,8 +470,11 @@ module ≅ᵐ-Reasoning where
 -- Two-cells between modalities as natural transformations
 --   between the underlying context functors
 
--- TwoCell is defined as a record type so that Agda can better infer the two endpoint
---   modalities, e.g. in coe-ty.
+{- 
+  TwoCell is defined as a record type so that Agda can better infer the two endpoint modalities, e.g. in coe-ty.
+  
+  TwoCell μ ρ = ρ ⇒ μ
+-}
 record TwoCell (μ ρ : Modality C D) : Set₁ where
   constructor two-cell
   field

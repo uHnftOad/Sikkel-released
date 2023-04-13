@@ -32,12 +32,50 @@ infixr 4 lam[_∈_]_
 record PshFun {Γ : Ctx C} (T : Ty Γ) (S : Ty Γ) (z : Ob) (γ : Γ ⟨ z ⟩) : Set where
   constructor MkFun
   field
+    {-
+                     ρ
+        y ---------------------→ z
+      Γ ⟨ y ⟩ ←-------------- Γ ⟨ z ⟩
+                  Γ ⟪ ρ ⟫_
+        γ' ←--------------------| γ
+
+                               T ⟪ ρ , eγ ⟫_
+              T ⟨ y , γ' ⟩ ←------------------ T ⟨ z , γ ⟩
+                     |
+      _$⟨ ρ , eγ ⟩_  |
+                     ↓
+              S ⟨ y , γ' ⟩ ←------------------ S ⟨ z , γ ⟩
+                               S ⟪ ρ , eγ ⟫_
+
+      This record type 
+        > fixs some object ⟨ z , γ ⟩ of the category of elements ∫Γ of Γ over its base category C, 
+        > translates every arrow/morphism (ρ, γ') in ∫Γ to ⟨ z , γ ⟩ into a map T ⟨ y , γ' ⟩ → S ⟨ y , γ' ⟩.
+
+      A term of this type describes what it does at the domain ⟨ y , γ' ⟩ of every possible morphism ρ : y → z in ∫Γ, given a specific object ⟨ z , γ ⟩.
+    -}
     _$⟨_,_⟩_ : ∀ {y} (ρ : Hom y z) {γ' : Γ ⟨ y ⟩} (eγ : Γ ⟪ ρ ⟫ γ ≡ γ') →
                T ⟨ y , γ' ⟩ → S ⟨ y , γ' ⟩
+    {-
+             ρ-xy          ρ-yz
+        x ----------→ y ----------→ z
+                  Γ ⟪ ρ-xy ⟫_             Γ ⟪ ρ-xy ⟫_
+        Γ ⟨ x ⟩ ←------------- Γ ⟨ y ⟩ ←------------- Γ ⟨ z ⟩
+            γx ←-----------------| γy ←-----------------| γ
+
+                                                                  t ∈ ↓
+                            T ⟨ x , γx ⟩ ←------------------ T ⟨ y , γy ⟩ ←------------------ T ⟨ z , γ ⟩
+                                  |       T ⟪ ρ-xy , eγ-yx ⟫-       ∣        T ⟪ ρ-yz , eγ-zy ⟫-       |
+        _$⟨ ρ-yz ∙ ρ-xy , ... ⟩ t |                                 | _$⟨ ρ-yz , eγ-zy ⟩ t            | 
+                                  ↓                                 ↓                                 ↓
+                            S ⟨ x , γx ⟩ ←------------------ S ⟨ y , γy ⟩ ←------------------ S ⟨ z , γ ⟩
+                                          S ⟪ ρ-xy , eγ-yx ⟫-               S ⟪ ρ-yz , eγ-zy ⟫-
+      Natural as in the left part of the diagram above commutes.
+    -}      
     naturality : ∀ {x y} {ρ-xy : Hom x y} {ρ-yz : Hom y z} {γx : Γ ⟨ x ⟩} {γy : Γ ⟨ y ⟩} →
                  {eγ-zy : Γ ⟪ ρ-yz ⟫ γ ≡ γy} {eγ-yx : Γ ⟪ ρ-xy ⟫ γy ≡ γx} {t : T ⟨ y , γy ⟩} →
                  _$⟨_,_⟩_ (ρ-yz ∙ ρ-xy) (strong-ctx-comp Γ eγ-zy eγ-yx) (T ⟪ ρ-xy , eγ-yx ⟫ t) ≡
                    S ⟪ ρ-xy , eγ-yx ⟫ (_$⟨_,_⟩_ ρ-yz eγ-zy t)
+      
   infix 13 _$⟨_,_⟩_
 open PshFun public
 
@@ -60,11 +98,31 @@ to-pshfun-eq e = cong₂-d MkFun
   (funextI (funext (λ ρ → funextI (funext λ eq → funext λ t → e ρ eq t))))
   (funextI (funextI (funextI (funextI (funextI (funextI (funextI (funextI (funextI (uip _ _))))))))))
 
--- This will be used to define the action of a function type on morphisms.
+{-
+  φ : (z', γz') → (z, γz)
+                               T ⟪ φ , eγ-z ⟫_
+             T ⟨ z' , γz' ⟩ ←------------------ T ⟨ z , γz ⟩ ---------
+                   |                                                  |
+  _$⟨ φ , eγ-z ⟩_  |                                                  |
+                   ↓                                                  |
+             S ⟨ z' , γz' ⟩ ←------------------ S ⟨ z , γz ⟩ ------  | T ⟪ ρ-yz , eγ ⟫_
+                               S ⟪ φ , eγz ⟫_                      |  |
+                                                                   |  |
+                                                                   |  |
+                               T ⟪ ψ , eγ-y ⟫_                     |  |
+             T ⟨ x , γx ⟩ ←------------------ T ⟨ y , γy ⟩ ←------- 
+                   |                                               |
+  _$⟨ ψ , eγ-y ⟩_  |                                               | S ⟪ ρ-yz , eγ ⟫_
+                   ↓                                               |
+             S ⟨ x , γx ⟩ ←------------------ S ⟨ y , γy ⟩ ←-----
+                               S ⟪ ρ-xy , eγ-yx ⟫_
+  ρ-xy : (x, γx) → (y, γy)
+-}
+-- This will be used to define the action of a function type on morphisms of ∫Γ.
 lower-presheaffunc : {T : Ty Γ} {S : Ty Γ} (ρ-yz : Hom y z)
                      {γz : Γ ⟨ z ⟩} {γy : Γ ⟨ y ⟩} (eγ : Γ ⟪ ρ-yz ⟫ γz ≡ γy) →
                      PshFun T S z γz → PshFun T S y γy
-lower-presheaffunc {Γ = Γ}{y = y}{z = z}{T = T}{S = S} ρ-yz {γz}{γy} eγ-zy f = MkFun g g-nat
+lower-presheaffunc {Γ = Γ} {y = y} {z = z} {T = T} {S = S} ρ-yz {γz} {γy} eγ-zy f = MkFun g g-nat
   where
     g : ∀ {x} (ρ-xy : Hom x y) {γx} (eγ-yx : Γ ⟪ ρ-xy ⟫ γy ≡ γx) →
         T ⟨ x , γx ⟩ → S ⟨ x , γx ⟩
@@ -84,6 +142,7 @@ lower-presheaffunc {Γ = Γ}{y = y}{z = z}{T = T}{S = S} ρ-yz {γz}{γy} eγ-zy
 --------------------------------------------------
 -- Definition of the function type + term constructors
 
+-- A type constructor
 _⇛_ : {Γ : Ctx C} → Ty Γ → Ty Γ → Ty Γ
 _⇛_ {Γ = Γ} T S ⟨ z , γ ⟩ = PshFun T S z γ
 _⟪_,_⟫_ (T ⇛ S) = lower-presheaffunc
@@ -92,6 +151,14 @@ ty-id (_⇛_ {Γ = Γ} T S) {t = f} = to-pshfun-eq (λ _ eγ _ → $-cong f hom-
 ty-comp (_⇛_ {Γ = Γ} T S) {t = f} = to-pshfun-eq (λ _ _ _ → $-cong f ∙assoc)
 
 -- Lambda abstraction that adds a nameless variable to the context (only accessible by de Bruijn index).
+{-
+  Γ ⊢ T type
+  Γ, _ : T ⊢ S [ π ] type 
+  ------------------------
+  Γ ⊢ lam T f : T ⇛ S
+  can be thought of as λ_ : T. f
+  todo: understand
+-}
 lam : (T : Ty Γ) → Tm (Γ ,, T) (S [ π ]) → Tm Γ (T ⇛ S)
 lam {S = S} T b ⟨ z , γz ⟩' = MkFun (λ ρ-yz {γy} eγ t → b ⟨ _ , [ γy , t ] ⟩')
                                     (λ {x = x}{y}{ρ-xy}{_}{γx}{γy}{eγ-zy}{eγ-yx}{t} →
@@ -109,9 +176,39 @@ lam[_∈_]_ : (v : String) (T : Ty Γ) → Tm (Γ ,, v ∈ T) (S [ π ]) → Tm 
 lam[_∈_]_ v = lam
 
 -- An operator used to define function application.
+{-
+  Γ ⊢ f : T → S     Γ ⊢ t ⟨ x , γ ⟩' : T ⟨ x , γ ⟩
+  ---------------------------------------------------
+  Γ ⊢ f €⟨ x , γ ⟩ t : S ⟨ x , γ ⟩
+-}
 _€⟨_,_⟩_ : Tm Γ (T ⇛ S) → (x : Ob) (γ : Γ ⟨ x ⟩) → T ⟨ x , γ ⟩ → S ⟨ x , γ ⟩
 _€⟨_,_⟩_ {Γ = Γ} f x γ t = f ⟨ x , γ ⟩' $⟨ hom-id , ctx-id Γ ⟩ t
 
+-- `_€⟨_,_⟩_` commutes with morphisms.
+{-
+                  ρ
+        x ----------------→ y
+                Γ ⟪ ρ ⟫
+  Γ ⟨ x ⟩ ←-------------- Γ ⟨ y ⟩
+       γx ←-----------------| γy
+
+                                                   T ⟪ hom-id , ctx-id Γ ⟫_
+                                t ∈  T ⟨ x , γx ⟩ ←------------------------- T ⟨ x , γx ⟩
+                                           |                                      |
+    f ⟨ x , γ ⟩' $⟨ hom-id , ctx-id Γ ⟩_  |                                      |
+    = f €⟨ x , γx ⟩_                      ↓                                      ↓ 
+                                     S ⟨ x , γx ⟩ ←------------------------- S ⟨ x , γx ⟩
+                                                   S ⟪ hom-id , ctx-id Γ ⟫_
+
+
+                            T ⟪ ρ , eγ ⟫_
+            T ⟨ x , γx ⟩ ←----------------- T ⟨ y , γy ⟩ ∋ t
+                  |                               |
+  f €⟨ x , γx ⟩_ |                               | f €⟨ y , γy ⟩_
+                  ↓                               ↓
+            S ⟨ x , γx ⟩ ←----------------- S ⟨ y , γy ⟩
+                            S ⟪ ρ , eγ ⟫_
+-}
 €-natural : (f : Tm Γ (T ⇛ S)) {ρ : Hom x y}
             {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} {eγ : Γ ⟪ ρ ⟫ γy ≡ γx}
             {t : T ⟨ y , γy ⟩} →
@@ -121,12 +218,18 @@ _€⟨_,_⟩_ {Γ = Γ} f x γ t = f ⟨ x , γ ⟩' $⟨ hom-id , ctx-id Γ �
     S ⟪ ρ , eγ ⟫ (f ⟨ _ , γy ⟩' $⟨ hom-id , ctx-id Γ ⟩ t)
   ≡˘⟨ naturality (f ⟨ _ , γy ⟩') ⟩
     f ⟨ _ , γy ⟩' $⟨ hom-id ∙ ρ , strong-ctx-comp Γ (ctx-id Γ) eγ ⟩ (T ⟪ ρ , eγ ⟫ t)
-  ≡⟨ $-cong (f ⟨ _ , γy ⟩') (trans hom-idˡ (sym hom-idʳ)) ⟩
+  ≡⟨ $-cong (f ⟨ _ , γy ⟩') hom-idᵒ ⟩
     f ⟨ _ , γy ⟩' $⟨ ρ ∙ hom-id , strong-ctx-comp Γ eγ (ctx-id Γ) ⟩ (T ⟪ ρ , eγ ⟫ t)
   ≡⟨ cong (λ x → x $⟨ _ , _ ⟩ _) (naturality f ρ eγ) ⟩
     f ⟨ _ , γx ⟩' $⟨ hom-id , ctx-id Γ ⟩ (T ⟪ ρ , eγ ⟫ t) ∎
   where open ≡-Reasoning
 
+{-
+  Γ ⊢ f : T ⇛ S
+  Γ ⊢ t : T
+  -----------------
+  Γ ⊢ app f t : S
+-}
 app : Tm Γ (T ⇛ S) → Tm Γ T → Tm Γ S
 app f t ⟨ y , γ ⟩' = f €⟨ y , γ ⟩ (t ⟨ y , γ ⟩')
 naturality (app {Γ = Γ}{T = T}{S = S} f t) {γy = γy}{γx} ρ eγ =
@@ -165,6 +268,12 @@ naturality (pshfun-dimap {T = T}{T'}{S}{S'} η φ {z} {γ} f) {eγ-zy = eγ-zy} 
 func (⇛-dimap η φ) = pshfun-dimap η φ
 naturality (⇛-dimap η φ) = to-pshfun-eq λ _ _ _ → refl
 
+{-
+  Γ ⊢ T ≅ᵗʸ T'
+  Γ ⊢ S ≅ᵗʸ S'
+  -----------------------
+  Γ ⊢ T ⇛ S ≅ᵗʸ T' ⇛ S'
+-}
 ⇛-cong : T ≅ᵗʸ T' → S ≅ᵗʸ S' → T ⇛ S ≅ᵗʸ T' ⇛ S'
 from (⇛-cong T=T' S=S') = ⇛-dimap (to T=T') (from S=S')
 to (⇛-cong T=T' S=S') = ⇛-dimap (from T=T') (to S=S')
@@ -239,13 +348,13 @@ module _ (σ : Δ ⇒ Γ) (T : Ty Γ) (S : Ty Γ) {δ : Δ ⟨ z ⟩} where
   naturality (pshfun-subst-to f) {ρ-xy = ρ-xy}{ρ-yz} {eγ-yx = eγ-yx} {t = t} =
     begin
       S ⟪ hom-id , α ⟫ f $⟨ ρ-yz ∙ ρ-xy , refl ⟩ (T ⟪ hom-id , _ ⟫ T ⟪ ρ-xy , eγ-yx ⟫ t)
-    ≡⟨ cong (S ⟪ hom-id , α ⟫_ ∘ f $⟨ ρ-yz ∙ ρ-xy , refl ⟩_) (ty-cong-2-2 T (trans hom-idʳ (sym hom-idˡ))) ⟩
+    ≡⟨ cong (S ⟪ hom-id , α ⟫_ ∘ f $⟨ ρ-yz ∙ ρ-xy , refl ⟩_) (ty-cong-2-2 T hom-idⁱ) ⟩
       S ⟪ hom-id , α ⟫ f $⟨ ρ-yz ∙ ρ-xy , refl ⟩ (T ⟪ ρ-xy , _ ⟫ (T ⟪ hom-id , β ⟫ t))
     ≡⟨ cong (S ⟪ hom-id , α ⟫_) ($-cong f refl) ⟩
       S ⟪ hom-id , α ⟫ f $⟨ ρ-yz ∙ ρ-xy , _ ⟩ (T ⟪ ρ-xy , _ ⟫ (T ⟪ hom-id , β ⟫ t))
     ≡⟨ cong (S ⟪ hom-id , α ⟫_) (naturality f {eγ-yx = sym (ctx-comp Δ)}) ⟩
       S ⟪ hom-id , α ⟫ S ⟪ ρ-xy , _ ⟫ f $⟨ ρ-yz , refl ⟩ (T ⟪ hom-id , β ⟫ t)
-    ≡⟨ ty-cong-2-2 S (trans hom-idʳ (sym hom-idˡ)) ⟩
+    ≡⟨ ty-cong-2-2 S hom-idⁱ ⟩
       S ⟪ ρ-xy , eγ-yx ⟫ S ⟪ hom-id , _ ⟫ f $⟨ ρ-yz , refl ⟩ (T ⟪ hom-id , β ⟫ t) ∎
     where
       open ≡-Reasoning

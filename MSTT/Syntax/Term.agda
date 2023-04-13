@@ -52,7 +52,7 @@ data TmExpr where
 TmExtArgs [] = ⊤
 TmExtArgs (m ∷ margs) = TmExpr m × TmExtArgs margs
 
-
+-- skipped: 
 -- Variables that can be accessed via the trivial 2-cell (which is very common).
 svar : String → TmExpr m
 svar x = var x id-cell

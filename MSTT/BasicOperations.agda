@@ -22,11 +22,13 @@ private variable
 --   If Γ ⊢ t : ⟨ μ ∣ A ⟩, then Γ ⊢ coe[ α ∈ μ ⇒ ρ ] t : ⟨ ρ ∣ A ⟩.
 --   No problem arises if t contains a variable named "x" since t is checked in
 --   Γ and not Γ , μ ∣ "x" ∈ A.
+-- todo: understant what a coercion is
 coe[_∈_⇒_]_ : TwoCellExpr → ModalityExpr m m' → ModalityExpr m m' → TmExpr m' → TmExpr m'
 coe[ α ∈ μ ⇒ ρ ] t = let' mod⟨ μ ⟩ "x" ← t in' (mod⟨ ρ ⟩ (var "x" α))
 
 
 --------------------------------------------------
+-- skipped:
 -- Isomorphisms between A and ⟨ 𝟙 ∣ A ⟩ for any type A and between
 -- ⟨ μ ∣ ⟨ ρ ∣ A ⟩ ⟩ and ⟨ μ ⓜ ρ ∣ A ⟩ for any type A.
 

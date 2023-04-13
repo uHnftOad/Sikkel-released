@@ -2,7 +2,7 @@
 -- Definition of semantic guarded streams in base category ω
 --------------------------------------------------
 
-module Applications.GuardedRecursion.Model.Streams.Guarded where
+module Applications.CombiningFeatures.Model.Streams.Guarded where
 
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Properties
@@ -17,7 +17,7 @@ open import Level renaming (zero to lzero; suc to lsuc)
 open import Model.BaseCategory
 open import Model.CwF-Structure
 open import Model.Type.Function
-open import Applications.GuardedRecursion.Model.Modalities
+open import Applications.CombiningFeatures.Model.Modalities
 
 private
   variable

@@ -48,9 +48,18 @@ instance
 constantly-ty : Ty (now Γ) → Ty Γ
 constantly-ty {Γ = Γ} T ⟨ n , γ ⟩ = T ⟨ tt , Γ ⟪ z≤n ⟫ γ ⟩
 _⟪_,_⟫_ (constantly-ty {Γ = Γ} T) m≤n {γy = γn}{γx = γm} eγ = T ⟪ tt , proof ⟫_
+{-
+  eγ : Γ ⟪ m≤n ⟫ γn ≡ γm
+  RHS : 
+      (constantly-ty T) ⟨ n , γn ⟩ → (constantly-ty T) ⟨ m , γm ⟩
+    = T ⟨ tt , Γ ⟪ z≤n ⟫ γn ⟩ → T ⟨ tt , Γ ⟪ z≤n ⟫ γm ⟩
+    = T ⟪ tt , proof ⟫ _
+    proof : now Γ ⟪ tt ⟫ (Γ ⟪ z≤n ⟫ γn) ≡ Γ ⟪ z≤n ⟫ γm
+-}
   where
     open ≡-Reasoning
     proof : Γ ⟪ z≤n ⟫ γn ≡ Γ ⟪ z≤n ⟫ γm
+      -- `z≤n` refers to a term constructor for type `_≤_`
     proof =
       begin
         Γ ⟪ z≤n ⟫ γn

@@ -28,13 +28,22 @@ private
 
 
 -- Definition of the extension of a context Γ with a type T.
--- In MLTT, this would be written as Γ, x : T.
+-- In MLTT, this would be written as Γ, y : T.
 _,,_ : (Γ : Ctx C) (T : Ty Γ) → Ctx C
-(Γ ,, T) ⟨ x ⟩ = Σ[ γ ∈ Γ ⟨ x ⟩ ] (T ⟨ x , γ ⟩)
+(Γ ,, T) ⟨ x ⟩ = Σ[ γ ∈ Γ ⟨ x ⟩ ] (T ⟨ x , γ ⟩) 
+  -- = Γ ⟨ x ⟩ × T ⟨ x , _ ⟩
+  -- after choosing specific values for all the variables in Γ, determines a value for T ⟨ x , _ ⟩ since it depends mostly on Γ
 (Γ ,, T) ⟪ f ⟫ [ γ , t ] = [ Γ ⟪ f ⟫ γ , T ⟪ f , refl ⟫ t ]
 ctx-id (Γ ,, T) = to-Σ-ty-eq T (ctx-id Γ) (trans (ty-cong-2-1 T hom-idˡ) (ty-id T))
 ctx-comp (Γ ,, T) = to-Σ-ty-eq T (ctx-comp Γ) (ty-cong-2-2 T hom-idʳ)
 
+{-
+  func π {x} : Σ[ γ ∈ Γ ⟨ x ⟩ ] (T ⟨ x , γ ⟩)  → Γ ⟨ x ⟩
+  func π {x} [ γ , t ] = γ : Γ ⟨ x ⟩
+
+  Γ ,, T ⊢ T [ π ] ⟨ x , [ γ , t ] ⟩ = T ⟨ x , γ ⟩
+    with [ γ , t ] : Σ[ γ ∈ Γ ⟨ x ⟩ ] (T ⟨ x , γ ⟩) 
+-}
 π : Γ ,, T ⇒ Γ
 func π = proj₁
 naturality π = refl

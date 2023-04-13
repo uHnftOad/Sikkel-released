@@ -38,8 +38,13 @@ data TyExpr where
   _⊠_ : TyExpr m → TyExpr m → TyExpr m
   ⟨_∣_⟩ : ModalityExpr m m' → TyExpr m → TyExpr m'
   Ext : ∀ {margs m} → TyExtCode margs m → TyExtArgs margs → TyExpr m
-    -- ^ Every code in the universe of ty-ext gives rise to a new type constructor,
-    --   whose arguments are expressed by TyExtArgs.
+    -- ^ Every code in the universe of `ty-ext` gives rise to a new type constructor,
+    --   whose arguments are expressed by `TyExtArgs`.
+    {- 
+      The first expicit argument has type `TyExtCode margs m`, which contains the codes specified by the type extension instance `ty-ext`. Each code is coupled with the modes they use, `ty-ext` comes with an instruction on how to translate each code into semantic types. 
+
+      Suppose the first argument is c : TyExtCode margs m. At this point we know that its domain must come from the modes specified in margs and its codomain must live in mode m. The second and third arguments pick concrete MSTT types that live in these modes. 
+    -}
 
 TyExtArgs [] = ⊤
 TyExtArgs (m ∷ margs) = TyExpr m × TyExtArgs margs
@@ -64,6 +69,7 @@ show-ext-type {m ∷ margs} f args = show-ext-type (f (show-type (proj₁ args))
 
 --------------------------------------------------
 -- Deciding whether a type expression is a function type, a product type or a modal type.
+-- skipped: 
 
 data IsFuncTyExpr : TyExpr m → Set where
   func-ty : (T S : TyExpr m) → IsFuncTyExpr (T ⇛ S)

@@ -1,10 +1,11 @@
 --------------------------------------------------
 -- An instance of MSTT can be extended with custom type constructors, and this
 --   file provides the interface to do so. MSTT is parametrized by a record of
---   type TyExt, which specifies among others a universe of codes for the new
---   type constructors, how these constructors will be interpreted in the presheaf
---   model, and proofs that this interpretation is a congruence.
---   Every code in the universe comes with a list of modes, representing the modes
+--   type `TyExt`, which specifies among others 
+--       1. a universe of codes for the new type constructors,
+--       2. how these constructors will be interpreted in the presheaf model, and 
+--       3. proofs that this interpretation is a congruence.
+-- Every code in the universe comes with a list of modes, representing the modes
 --   of the constructor's arguments, and a mode at which the resulting type will live.
 --------------------------------------------------
 
@@ -32,10 +33,13 @@ TyExtShow [] = String
 TyExtShow (m ∷ margs) = String → TyExtShow margs
 
 -- Every code is interpreted as a semantic type constructor working on closed types.
+{- Translates the modes associated with an MSTT type constructor (i.e., a code) to their corresponding interpretations  -}
 TyConstructor : List ModeExpr → ModeExpr → Set₁
 TyConstructor []           m = ClosedTy ⟦ m ⟧mode
 TyConstructor (m' ∷ margs) m = ClosedTy ⟦ m' ⟧mode → TyConstructor margs m
 
+{- A proof that the semantic types of type `TyConstructor margs m` are natural -}
+-- question: why is there an input argument {[]}
 TyConstructorNatural : TyConstructor margs m → Set₁
 TyConstructorNatural {[]}        T = IsClosedNatural T
 TyConstructorNatural {m ∷ margs} F = {S : ClosedTy ⟦ m ⟧mode} → IsClosedNatural S → TyConstructorNatural (F S)
@@ -57,5 +61,7 @@ record TyExt : Set₁ where
     _≟code_ : (c1 c2 : TyExtCode margs m) → TCM (c1 ≡ c2)
     show-code : TyExtCode margs m → TyExtShow margs
     interpret-code : TyExtCode margs m → TyConstructor margs m
+    
+    -- Proofs
     interpret-code-natural : (c : TyExtCode margs m) → TyConstructorNatural (interpret-code c)
     interpret-code-cong : (c : TyExtCode margs m) → TyConstructorCong (interpret-code c)

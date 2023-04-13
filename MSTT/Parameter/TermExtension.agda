@@ -1,10 +1,11 @@
 --------------------------------------------------
 -- An instance of MSTT can be extended with custom term constructors, and this
 --   file provides the interface to do so. MSTT is parametrized by a record of
---   type TmExt, which specifies a universe of codes for the new term constructors
---   and the implementation of type inference for these constructors, as well as
---   their interpretation in a presheaf model.
---   Every code in the universe comes with a list of modes, representing the modes
+--   type `TmExt`, which specifies 
+--       1. a universe of codes for the new term constructors,
+--       2. the implementation of type inference for these constructors, and 
+--       3. their interpretation in a presheaf model.
+-- Every code in the universe comes with a list of modes, representing the modes
 --   of the constructor's arguments, and a mode at which the resulting term will live.
 --------------------------------------------------
 

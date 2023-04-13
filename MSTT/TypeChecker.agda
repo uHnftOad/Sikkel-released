@@ -44,6 +44,7 @@ private
 
 
 --------------------------------------------------
+-- skipped: 
 -- Checking + interpretation of variables
 
 -- When checking and interpreting a variable x in a context Γ, all other variables

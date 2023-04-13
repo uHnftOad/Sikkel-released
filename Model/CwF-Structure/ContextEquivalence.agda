@@ -26,6 +26,7 @@ record _≅ᶜ_ (Δ : Ctx C) (Γ : Ctx C) : Set where
     isoʳ : from ⊚ to ≅ˢ id-subst Γ
 open _≅ᶜ_ public
 
+-- Properties of equivalence of contexts
 ≅ᶜ-refl : Γ ≅ᶜ Γ
 from (≅ᶜ-refl {Γ = Γ}) = id-subst Γ
 to (≅ᶜ-refl {Γ = Γ}) = id-subst Γ

@@ -29,7 +29,7 @@ private
     m : ModeExpr
     margs : List ModeExpr
 
-
+-- skipped:
 ⟦_⟧ty : TyExpr m → ClosedTy ⟦ m ⟧mode
 interpret-ext-ty : TyConstructor margs m → TyExtArgs margs → ClosedTy ⟦ m ⟧mode
 
@@ -48,6 +48,7 @@ interpret-ext-ty {m ∷ margs} F args = interpret-ext-ty (F ⟦ proj₁ args ⟧
 ⟦ Γ , μ ∣ _ ∈ T ⟧ctx = ⟦ Γ ⟧ctx M.,, M.⟨ ⟦ μ ⟧modality ∣ ⟦ T ⟧ty ⟩
 ⟦ Γ ,lock⟨ μ ⟩ ⟧ctx = ⟦ Γ ⟧ctx M.,lock⟨ ⟦ μ ⟧modality ⟩
 
+{- A proof that the interpretations of Sikkel types are natural -}
 ⟦⟧ty-natural : (T : TyExpr m) → IsClosedNatural ⟦ T ⟧ty
 interpret-ext-ty-natural : {F : TyConstructor margs m} → TyConstructorNatural F → (args : TyExtArgs margs) →
                            IsClosedNatural (interpret-ext-ty F args)

@@ -41,11 +41,23 @@ record Ty (Γ : Ctx C) : Set₁ where
   field
     ty-cell : (x : Ob) (γ : Γ ⟨ x ⟩) → Set
     ty-hom : ∀ {x y} (f : Hom x y) {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} → Γ ⟪ f ⟫ γy ≡ γx → ty-cell y γy → ty-cell x γx
+      -- The action of a type in conrext Γ on morphisms in the cateogry ∫Γ = El(Γ)
+      -- The first explicit argument is a proof that a morphism f : x → y in category C is a morphism in the category of elements ∫Γ of Γ over C. 
+      -- `Ty Γ` is the presheaf category Psh(∫Γ).
     ty-cong : {f f' : Hom x y} (e-hom : f ≡ f')
               {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} {eγ : Γ ⟪ f ⟫ γy ≡ γx} {eγ' : Γ ⟪ f' ⟫ γy ≡ γx}
               {t : ty-cell y γy} →
               ty-hom f eγ t ≡ ty-hom f' eγ' t
+      {-
+        The action of a type on the morphisms in ∫Γ maps equivalent morphisms to pointwise equivalent morphisms.
+        
+        Γ ⊢ f f' : x → y      Γ ⊢ f ≡ f'
+        ----------------------------------
+        Γ ⊢ T ⟪ f , _ ⟫_ ≡ T ⟪ f' , _ ⟫_
+      -}
     ty-id : ∀ {x} {γ : Γ ⟨ x ⟩} {t : ty-cell x γ} → ty-hom hom-id (ctx-id Γ) t ≡ t
+      -- The action of a type on the morphisms in ∫Γ preserves identity morphisms. 
+      -- T ⟪ hom-id C , ctx-id Γ ⟫ t ≡ t
     ty-comp : ∀ {x y z} {f : Hom x y} {g : Hom y z} {γz : Γ ⟨ z ⟩} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} →
               {eγ-zy : Γ ⟪ g ⟫ γz ≡ γy} {eγ-yx : Γ ⟪ f ⟫ γy ≡ γx} {t : ty-cell z γz} →
               ty-hom (g ∙ f) (strong-ctx-comp Γ eγ-zy eγ-yx) t ≡ ty-hom f eγ-yx (ty-hom g eγ-zy t)
@@ -55,6 +67,12 @@ private
   variable
     T S R : Ty Γ
 
+{-
+  Γ ⊢ T 
+  Γ ⊢ t : T ⟨ x , γ ⟩
+  -----------------------
+  T ⟪ hom-id , eγ ⟫ t ≡ t 
+-}
 strong-ty-id : (T : Ty Γ) {γ : Γ ⟨ x ⟩} {eγ : Γ ⟪ hom-id ⟫ γ ≡ γ} {t : T ⟨ x , γ ⟩} →
                T ⟪ hom-id , eγ ⟫ t ≡ t
 strong-ty-id T = trans (ty-cong T refl) (ty-id T)
@@ -65,6 +83,21 @@ strong-ty-comp : (T : Ty Γ) {f : Hom x y} {g : Hom y z} {γz : Γ ⟨ z ⟩} {�
                 T ⟪ g ∙ f , eγ-zx ⟫ t ≡ T ⟪ f , eγ-yx ⟫ T ⟪ g , eγ-zy ⟫ t
 strong-ty-comp T = trans (ty-cong T refl) (ty-comp T)
 
+{-
+             Γ ⟪ f ⟫_
+    Γ ⟨ x ⟩ ←-------- Γ ⟨ y ⟩
+        ⟍             ↗
+  Γ ⟪ h ⟫_ ⟍       ⟋ Γ ⟪ g ⟫_
+              ↘ ⟋ 
+            Γ ⟨ z ⟩
+  
+               T ⟪ f , ef ⟫_
+  T ⟨ x , γx ⟩ ←----------- T ⟨ y , γy ⟩
+             ↖             ↗
+  T ⟪ h , eh ⟫_ ⟍       ⟋ T ⟪ g , eg ⟫_
+                   ⟍ ⟋ 
+                T ⟨ z , γz ⟩ ∋ t
+-}
 ty-cong-2-1 : (T : Ty Γ)
               {f : Hom x y} {g : Hom y z} {h : Hom x z} (e-hom : g ∙ f ≡ h)
               {γz : Γ ⟨ z ⟩} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩}
@@ -80,6 +113,24 @@ ty-cong-2-1 T {f}{g}{h} e-hom {t = t} =
     T ⟪ h , _ ⟫ t ∎
   where open ≡-Reasoning
 
+{-
+                   Γ ⟪ f ⟫_ 
+         Γ ⟨ x ⟩ ←---------- Γ ⟨ y ⟩ 
+            ↑                   ↑
+  Γ ⟪ f' ⟫_ |                   | Γ ⟪ g ⟫_ 
+            |                   ∣
+         Γ ⟨ z ⟩ ←---------- Γ ⟨ w ⟩ 
+                   Γ ⟪ g' ⟫_ 
+  
+                          T ⟪ f , ef ⟫_ 
+            T ⟨ x , γx ⟩ ←--------------- T ⟨ y , γy ⟩ 
+                  ↑                             ↑
+  T ⟪ f' , ef' ⟫_ |                             | T ⟪ g , eg ⟫_ 
+                  |                             ∣
+            T ⟨ z , γz ⟩ ←--------------- T ⟨ w , γw ⟩ ∋ t
+                          T ⟪ g' , eg' ⟫_ 
+  The above diagram is commutative.
+-}
 ty-cong-2-2 : (T : Ty Γ)
               {f : Hom x y} {f' : Hom x z} {g : Hom y w} {g' : Hom z w} (e-hom : g ∙ f ≡ g' ∙ f')
               {γw : Γ ⟨ w ⟩} {γz : Γ ⟨ z ⟩} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩}
@@ -98,8 +149,10 @@ ty-cong-2-2 T {f}{f'}{g}{g'} e-hom {t = t} =
     T ⟪ f' , _ ⟫ T ⟪ g' , _ ⟫ t ∎
   where open ≡-Reasoning
 
-ty-ctx-subst : (T : Ty Γ) {γ γ' : Γ ⟨ x ⟩} → γ ≡ γ' → T ⟨ x , γ ⟩ → T ⟨ x , γ' ⟩
-ty-ctx-subst {Γ = Γ} T eγ = T ⟪ hom-id , trans (ctx-id Γ) eγ ⟫_
+-- For type conversion δ
+ty-ctx-subst : (T : Ty Γ) {δ δ' : Γ ⟨ x ⟩} → δ ≡ δ' → T ⟨ x , δ ⟩ → T ⟨ x , δ' ⟩
+ty-ctx-subst {Γ = Γ} {x = x} T {δ = δ} eδ = T ⟪ hom-id , trans (ctx-id Γ {x} {δ}) eδ ⟫_
+  -- trans (ctx-id Γ {x} {δ}) eγ : Γ ⟪ hom-id {x} ⟫ δ ≡ δ'
 
 ty-ctx-subst-inverseˡ : (T : Ty Γ) {γ γ' : Γ ⟨ x ⟩} {eγ : γ ≡ γ'} {t : T ⟨ x , γ ⟩} →
                         ty-ctx-subst T (sym eγ) (ty-ctx-subst T eγ t) ≡ t
@@ -109,7 +162,7 @@ ty-ctx-subst-inverseʳ : (T : Ty Γ) {γ γ' : Γ ⟨ x ⟩} {eγ : γ ≡ γ'} 
                         ty-ctx-subst T eγ (ty-ctx-subst T (sym eγ) t) ≡ t
 ty-ctx-subst-inverseʳ T = trans (ty-cong-2-1 T hom-idˡ) (ty-id T)
 
--- The following definition is needed when defining context extension.
+-- The following definition is needed when defining context extension. 
 to-Σ-ty-eq : ∀ {ℓ} {A : Set ℓ} (T : Ty Γ)
              {a b : A} (e : a ≡ b)
              {γ : A → Γ ⟨ x ⟩}
@@ -128,17 +181,35 @@ from-Σ-ty-eq T refl = [ refl , strong-ty-id T ]
 --------------------------------------------------
 -- Natural transformations between types
 
+-- Morphisms in the category of elements ∫Γ of Γ over base category C
+-- `_↣_` to types is `_⇒_` to contexts.
 record _↣_ {Γ : Ctx C} (T : Ty Γ) (S : Ty Γ) : Set where
   no-eta-equality
   field
     func : ∀ {x} {γ} → T ⟨ x , γ ⟩ → S ⟨ x , γ ⟩
+      {-
+        Γ ⊢ t : T
+        -----------------------------------------------------
+        Γ ⊢ func (T ↣ S) t ⟨ x , γ ⟩' : S ⟨ x , γ ⟩
+      -}
     naturality : ∀ {x y} {f : Hom x y} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} {eγ : Γ ⟪ f ⟫ γy ≡ γx} {t : T ⟨ y , γy ⟩} →
                  S ⟪ f , eγ ⟫ (func t) ≡ func (T ⟪ f , eγ ⟫ t)
+      {-
+                                 S ⟪ f , eγ ⟫_
+               S ⟨ x , γx ⟩ ←--------------------- S ⟨ y , γy ⟩
+                     ↑                                    ↑
+        func (T ↣ S) |                                    | func (T ↣ S)
+                     |                                    |
+                     |                                    |
+               T ⟨ x , γx ⟩ ←--------------------- T ⟨ y , γy ⟩ ∋ t
+                                 T ⟪ f , eγ ⟫_
+      -}
 open _↣_ public
 
+-- Morphisms in the category of elements ∫Γ of Γ are equivalent if they are pointwise equal.
 record _≅ⁿ_ {Γ : Ctx C} {T : Ty Γ} {S : Ty Γ} (η φ : T ↣ S) : Set where
   field
-    eq : ∀ {x γ} (t : T ⟨ x , γ ⟩) → func η t ≡ func φ t
+    eq : ∀ {x} {γ} (t : T ⟨ x , γ ⟩) → func η t ≡ func φ t
 open _≅ⁿ_ public
 
 ≅ⁿ-refl : {η : T ↣ S} → η ≅ⁿ η
@@ -292,12 +363,19 @@ module ≅ᵗʸ-Reasoning where
 --------------------------------------------------
 -- Substitution of types
 
+ty-subst-⟪_,_⟫-proof : (σ : Δ ⇒ Γ) (f : Hom x y) (δy : Δ ⟨ y ⟩) (δx : Δ ⟨ x ⟩) (eδ : Δ ⟪ f ⟫ δy ≡ δx) → Γ ⟪ f ⟫ func σ δy ≡ func σ δx
+ty-subst-⟪_,_⟫-proof σ f δy δx eδ = trans (_⇒_.naturality σ) (cong (func σ) eδ)
+
 _[_] : Ty Γ → Δ ⇒ Γ → Ty Δ
 T [ σ ] ⟨ x , δ ⟩ = T ⟨ x , func σ δ ⟩
 _⟪_,_⟫_ (_[_] {Γ = Γ} T σ) f {δy}{δx} eγ-yx t = T ⟪ f , proof ⟫ t
+  -- δy : Δ ⟨ y ⟩ and δx : Δ ⟨ x ⟩
+  -- eγ-yx : Δ ⟪ f ⟫ δy ≡ δx
+  -- t : T [ σ ] ⟨ y , δy ⟩ = T ⟨ y , func σ δy ⟩
+  -- RHS : T [ σ ] ⟨ x , δx ⟩ = T ⟨ x , func σ δx ⟩
   where
     proof : Γ ⟪ f ⟫ func σ δy ≡ func σ δx
-    proof = trans (naturality σ) (cong (func σ) eγ-yx)
+    proof = ty-subst-⟪_,_⟫-proof σ f δy δx eγ-yx
 ty-cong (T [ σ ]) f = ty-cong T f
 ty-id (T [ σ ]) = strong-ty-id T
 ty-comp (T [ σ ]) = strong-ty-comp T
@@ -318,6 +396,12 @@ naturality (to (ty-subst-comp T τ σ)) = ty-cong T refl
 eq (isoˡ (ty-subst-comp T τ σ)) _ = refl
 eq (isoʳ (ty-subst-comp T τ σ)) _ = refl
 
+{-
+  σ : Δ ⇒ Γ
+  Γ ⊢ η : T ↣ S
+  ---------------------------------------
+  Δ ⊢ ty-subst-map η : T [ σ ] ↣ S [ σ ]
+-}
 ty-subst-map : (σ : Δ ⇒ Γ) → (T ↣ S) → T [ σ ] ↣ S [ σ ]
 func (ty-subst-map σ η) t = func η t
 naturality (ty-subst-map σ η) = naturality η
@@ -341,9 +425,9 @@ eq (isoʳ (ty-subst-cong-ty σ T=S)) t = eq (isoʳ T=S) t
 
 ty-subst-cong-subst : {σ τ : Δ ⇒ Γ} → σ ≅ˢ τ → (T : Ty Γ) → T [ σ ] ≅ᵗʸ T [ τ ]
 func (from (ty-subst-cong-subst σ=τ T)) {_}{δ} t = ty-ctx-subst T (eq σ=τ δ) t
-naturality (from (ty-subst-cong-subst σ=τ T)) = ty-cong-2-2 T (trans hom-idˡ (sym hom-idʳ))
+naturality (from (ty-subst-cong-subst σ=τ T)) = ty-cong-2-2 T (hom-idᵒ)
 func (to (ty-subst-cong-subst σ=τ T)) {_}{δ} t = ty-ctx-subst T (sym (eq σ=τ δ)) t
-naturality (to (ty-subst-cong-subst σ=τ T)) = ty-cong-2-2 T (trans hom-idˡ (sym hom-idʳ))
+naturality (to (ty-subst-cong-subst σ=τ T)) = ty-cong-2-2 T (hom-idᵒ)
 eq (isoˡ (ty-subst-cong-subst {Γ = Γ} σ=τ T)) t =
   -- Here we cannot use ty-id T twice because the omitted equality proofs are not ctx-id Γ _
   -- (i.e. T ⟪_⟫ t is not applied to the identity morphism in the category of elements of Γ).
