@@ -40,8 +40,7 @@ record Modality (C D : BaseCategory) : Set₁ where
 
   lock-fmap : {Δ Γ : Ctx D} → (Δ ⇒ Γ) → (lock Δ ⇒ lock Γ)
   lock-fmap = ctx-fmap ctx-functor
-    -- The action of this modality on the morphisms (i.e., substiutions) of Psh(D)
-
+    -- The action of this modality on the context substitutions in PSh(D)
   lock-fmap-cong = ctx-fmap-cong ctx-functor
     -- The action of this modality on the morphisms respects equivalence of substituions.
   lock-fmap-id = ctx-fmap-id ctx-functor
