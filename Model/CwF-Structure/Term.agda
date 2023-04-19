@@ -38,7 +38,7 @@ record Tm (Γ : Ctx C) (T : Ty Γ) : Set where
       {-
         T ⟨ x , γx ⟩ ←--------------------- T ⟨ y , γy ⟩
                            T ⟪ f , eγ ⟫_
-        t ⟨ x , γx ⟩' ←-------------------| t ⟨ y , γy ⟩'
+        t ⟨ x , γx ⟩' ←-------------------⊣ t ⟨ y , γy ⟩'
       -}
 open Tm public renaming (term to infix 15 _⟨_,_⟩')
 

@@ -66,7 +66,8 @@ record Modality (C D : BaseCategory) : Set₁ where
 
     mod-intro : {Γ : Ctx D} {T : Ty (lock Γ)} → Tm (lock Γ) T → Tm Γ (⟨_∣_⟩ T)
       -- The action of this modality on terms
-        -- μ : C → D    lock(Γ) ⊢ t : T
+        -- μ : C → D    
+        -- lock(Γ) ⊢ t : T
         -- ----------------------------- TM/MODAL-INTRO
         -- Γ ⊢ mod-intro(t) : ⟨μ ∣ T⟩
     mod-intro-cong : {Γ : Ctx D} {T : Ty (lock Γ)} {t t' : Tm (lock Γ) T} →
@@ -107,7 +108,7 @@ record Modality (C D : BaseCategory) : Set₁ where
       -- An η-rule
       -- If `Γ ⊢ t : ⟨_∣ T⟩`, then `mod-intro (mod-elim t)` and `t` should be literally the same. 
 
-  -- todo: understand
+  -- question: 
   mod-elim-natural : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} (t : Tm Γ (⟨_∣_⟩ T)) →
                      (mod-elim t) [ lock-fmap σ ]' ≅ᵗᵐ mod-elim (ι⁻¹[ mod-natural σ ] (t [ σ ]'))
   mod-elim-natural σ t = begin
@@ -148,7 +149,6 @@ IsClosedNatural.closed-natural (mod-closed {μ = μ} {T = T}) σ =
 
 --------------------------------------------------
 -- Properties of modalities with respect to functions, products, ...
--- skipped: 
 module _ (μ : Modality C D) {Γ : Ctx D} where
 
   module _ {T S : Ty (Γ ,lock⟨ μ ⟩)} where
