@@ -107,7 +107,6 @@ _ⓕ_ : ∀ {C1 C2 C3} → CtxFunctor C2 C3 → CtxFunctor C1 C2 → CtxFunctor 
 ctx-op (Φ ⓕ Ψ) = λ Γ → ctx-op Φ (ctx-op Ψ Γ)
 is-functor (Φ ⓕ Ψ) = composed-functor (is-functor Φ) (is-functor Ψ)
 
--- Composition of context functors respctects equivalence of contexts
 ctx-functor-cong : (F : CtxFunctor C D) {Γ Δ : Ctx C} → Γ ≅ᶜ Δ → ctx-op F Γ ≅ᶜ ctx-op F Δ
 from (ctx-functor-cong F Γ=Δ) = ctx-fmap F (from Γ=Δ)
 to (ctx-functor-cong F Γ=Δ) = ctx-fmap F (to Γ=Δ)

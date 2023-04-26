@@ -157,4 +157,33 @@ eq (fix-substˡ-⊚ τ σ) γ = refl
 fix-substʳ-⊚ : (τ : Γ ⇒ Θ) → (σ : Δ ⇒ Γ) → 
   (τ ⊚ σ) ˢ⟨ d ⟩ʳ ≅ˢ (τ ˢ⟨ d ⟩ʳ) ⊚ (σ ˢ⟨ d ⟩ʳ)
 eq (fix-substʳ-⊚ τ σ) γ = refl
- 
+
+eγ-decompnˡ : {f : Hom C c₁ c₂} {g : Hom D d₁ d₂} →
+  {γ₁ : Γ ⟨ [ c₁ , d₁ ] ⟩} {γ₂ : Γ ⟨ [ c₂ , d₂ ] ⟩} → 
+  (eγ : Γ ⟪ [ f , g ] ⟫ γ₂ ≡ γ₁) → 
+  Γ ⟪ [ hom-id C {c₁} , g ] ⟫ (Γ ⟪ [ f , hom-id D {d₂} ] ⟫ γ₂) ≡ γ₁
+eγ-decompnˡ {Γ = Γ} {f = f} {g = g} {γ₁ = γ₁} {γ₂ = γ₂} eγ = 
+  begin 
+    Γ ⟪ [ hom-id C , g ] ⟫ (Γ ⟪ [ f , hom-id D ] ⟫ γ₂)
+  ≡˘⟨ ctx-comp Γ ⟩
+    Γ ⟪ [ _∙_ C f (hom-id C) , _∙_ D (hom-id D) g ] ⟫ γ₂
+  ≡⟨ cong (Γ ⟪_⟫ γ₂) (×-≡,≡→≡ [ hom-idʳ C , hom-idˡ D ]) ⟩
+    Γ ⟪ [ f , g ] ⟫ γ₂ 
+  ≡⟨ eγ ⟩ 
+    γ₁ ∎
+  where open ≡-Reasoning
+
+eγ-decompnʳ : {f : Hom C c₁ c₂} {g : Hom D d₁ d₂} →
+  {γ₁ : Γ ⟨ [ c₁ , d₁ ] ⟩} {γ₂ : Γ ⟨ [ c₂ , d₂ ] ⟩} → 
+  (eγ : Γ ⟪ [ f , g ] ⟫ γ₂ ≡ γ₁) → 
+  Γ ⟪ [ f , hom-id D {d₁} ] ⟫ (Γ ⟪ [ hom-id C {c₂} , g ] ⟫ γ₂) ≡ γ₁
+eγ-decompnʳ {Γ = Γ} {f = f} {g = g} {γ₁ = γ₁} {γ₂ = γ₂} eγ =
+  begin
+    Γ ⟪ [ f , hom-id D ] ⟫ (Γ ⟪ [ hom-id C , g ] ⟫ γ₂)
+  ≡˘⟨ ctx-comp Γ ⟩
+    Γ ⟪ [ _∙_ C (hom-id C) f , _∙_ D g (hom-id D) ] ⟫ γ₂
+  ≡⟨ cong (Γ ⟪_⟫ γ₂) (×-≡,≡→≡ [ hom-idˡ C , hom-idʳ D ]) ⟩
+    Γ ⟪ [ f , g ] ⟫ γ₂
+  ≡⟨ eγ ⟩
+    γ₁ ∎
+  where open ≡-Reasoning

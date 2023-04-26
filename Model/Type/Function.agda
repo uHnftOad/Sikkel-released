@@ -21,6 +21,7 @@ private
     x y z : Ob
     Γ Δ : Ctx C
     T T' S S' : Ty Γ
+    R : Ty Γ
 
 infixr 12 _⇛_
 infixr 4 lam[_∈_]_
@@ -464,6 +465,12 @@ eq (⇛-↣-iso {Γ = Γ} f) {x} γ = to-pshfun-eq (λ {y} ρ {γ'} eγ t →
   ≡⟨ $-cong (f ⟨ x , γ ⟩') hom-idʳ ⟩
     f ⟨ x , γ ⟩' $⟨ ρ , eγ ⟩ t ∎)
   where open ≡-Reasoning
+
+⇛-to-↣-cong : {f f' : Tm Γ (T ⇛ S)} → f ≅ᵗᵐ f' → ⇛-to-↣ f ≅ⁿ ⇛-to-↣ f'
+eq (⇛-to-↣-cong f=f') t = €-cong f=f' refl 
+
+↣-to-⇛-cong : {η η' : T ↣ S} → η ≅ⁿ η' → ↣-to-⇛ η ≅ᵗᵐ ↣-to-⇛ η'
+eq (↣-to-⇛-cong η=η') {x} γ = to-pshfun-eq (λ _ _ _ → eq η=η' _)
 
 
 --------------------------------------------------

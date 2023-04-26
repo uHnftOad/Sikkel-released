@@ -1,10 +1,12 @@
 --------------------------------------------------
 -- Definition and properties of modalities
 --------------------------------------------------
+{-# OPTIONS --allow-unsolved-metas #-}
 
 module Model.Modality where
 
 open import Relation.Binary.PropositionalEquality hiding ([_]; naturality)
+open import Data.Product renaming (_,_ to [_,_])
 
 open import Model.BaseCategory
 open import Model.CwF-Structure
@@ -78,7 +80,6 @@ record Modality (C D : BaseCategory) : Set₁ where
         -- Γ ⊢ mod-intro(t) mod-intro(t) : ⟨μ ∣ T⟩    mod-intro t ≅ᵗᵐ mod-intro t'
     mod-intro-natural : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} (t : Tm (lock Γ) T) →
                         (mod-intro t) [ σ ]' ≅ᵗᵐ ι[ mod-natural σ ] mod-intro (t [ lock-fmap σ ]')
-      -- todo: ^ The action of this modality on terms commutes with term substitutions
     mod-intro-ι : {Γ : Ctx D} {T S : Ty (lock Γ)} (T=S : T ≅ᵗʸ S) (t : Tm (lock Γ) S) →
                   ι[ mod-cong T=S ] mod-intro t ≅ᵗᵐ mod-intro (ι[ T=S ] t)
       -- The action of this modality on terms commutes with term constructors `mod-intro` and ι[_]_
@@ -101,14 +102,10 @@ record Modality (C D : BaseCategory) : Set₁ where
 
     mod-β : {Γ : Ctx D} {T : Ty (lock Γ)} (t : Tm (lock Γ) T) →
             mod-elim (mod-intro t) ≅ᵗᵐ t
-      -- A β-rule
-      -- If `lock Γ ⊢ t : T`, then `mod-elim (mod-intro t)` and `t` should be literally the same. 
+            
     mod-η : {Γ : Ctx D} {T : Ty (lock Γ)} (t : Tm Γ (⟨_∣_⟩ T)) →
             mod-intro (mod-elim t) ≅ᵗᵐ t
-      -- An η-rule
-      -- If `Γ ⊢ t : ⟨_∣ T⟩`, then `mod-intro (mod-elim t)` and `t` should be literally the same. 
 
-  -- question: 
   mod-elim-natural : {Δ Γ : Ctx D} (σ : Δ ⇒ Γ) {T : Ty (lock Γ)} (t : Tm Γ (⟨_∣_⟩ T)) →
                      (mod-elim t) [ lock-fmap σ ]' ≅ᵗᵐ mod-elim (ι⁻¹[ mod-natural σ ] (t [ σ ]'))
   mod-elim-natural σ t = begin
@@ -152,7 +149,6 @@ IsClosedNatural.closed-natural (mod-closed {μ = μ} {T = T}) σ =
 module _ (μ : Modality C D) {Γ : Ctx D} where
 
   module _ {T S : Ty (Γ ,lock⟨ μ ⟩)} where
-
     -- A modality is a functor.
     modality-map : Tm (Γ ,lock⟨ μ ⟩) (T ⇛ S) → Tm Γ ⟨ μ ∣ T ⟩ → Tm Γ ⟨ μ ∣ S ⟩
     modality-map f t = mod-intro μ (f $ mod-elim μ t)
@@ -213,7 +209,7 @@ module _ (μ : Modality C D) {Γ : Ctx D} where
       ≅⟨ mod-η μ p ⟩
         p ∎
       where open ≅ᵗᵐ-Reasoning
-
+   
   -- Modalities preserve the unit type (up to isomorphism).
   mod-unit' : Tm Γ ⟨ μ ∣ Unit' ⟩
   mod-unit' = mod-intro μ tt'
@@ -228,6 +224,66 @@ module _ (μ : Modality C D) {Γ : Ctx D} where
       mod-intro μ tt' ∎
     where open ≅ᵗᵐ-Reasoning
 
+-- Given a natural transformation T ↣ S in C, construct a natural transformation ⟨ μ | T ⟩ ↣ ⟨ μ | S ⟩ in D
+module _ (μ : Modality C D) {Γ : Ctx D}  where
+  module _ {T S : Ty (Γ ,lock⟨ μ ⟩)} (input : T ↣ S) where
+    mod-on-↣-helper₁ : Tm ((Γ ,, ⟨ μ ∣ T ⟩) ,lock⟨ μ ⟩) (T [ lock-fmap μ π ] ⇛ S [ lock-fmap μ π ])
+    mod-on-↣-helper₁ = ↣-to-⇛ (ty-subst-map (lock-fmap μ π) input)
+
+    mod-on-↣-helper₂ : Tm (Γ ,, ⟨ μ ∣ T ⟩) ⟨ μ ∣ S [ lock-fmap μ π ] ⟩
+    mod-on-↣-helper₂ = modality-map μ {Γ = Γ ,, ⟨ μ ∣ T ⟩} mod-on-↣-helper₁ (ι⁻¹[ mod-natural μ π ] ξ)
+
+    mod-on-↣-helper₃ : Tm (Γ ,, ⟨ μ ∣ T ⟩) (⟨ μ ∣ S ⟩ [ π ])
+    mod-on-↣-helper₃ = ι[ mod-natural μ π ] mod-on-↣-helper₂
+
+    mod-on-↣-helper₄ : Tm Γ (⟨ μ ∣ T ⟩ ⇛ ⟨ μ ∣ S ⟩)
+    mod-on-↣-helper₄ = lam ⟨ μ ∣ T ⟩ mod-on-↣-helper₃
+
+    mod-on-↣ : ⟨ μ ∣ T ⟩ ↣ ⟨ μ ∣ S ⟩
+    mod-on-↣ = ⇛-to-↣ mod-on-↣-helper₄
+
+  mod-on-↣-cong : {T S : Ty (Γ ,lock⟨ μ ⟩)} → {input₁ input₂ : T ↣ S} → input₁ ≅ⁿ input₂ → mod-on-↣ input₁ ≅ⁿ mod-on-↣ input₂
+  mod-on-↣-cong {T} {input₁ = input₁} {input₂ = input₂} s₁=s₂ = ⇛-to-↣-cong mod-on-↣-cong-step₄
+    where 
+      mod-on-↣-cong-step₁ : mod-on-↣-helper₁ input₁ ≅ᵗᵐ mod-on-↣-helper₁ input₂
+      mod-on-↣-cong-step₁ = ↣-to-⇛-cong (ty-subst-map-cong s₁=s₂)
+
+      mod-on-↣-cong-step₂ : mod-on-↣-helper₂ input₁ ≅ᵗᵐ mod-on-↣-helper₂ input₂
+      mod-on-↣-cong-step₂ = mod-intro-cong μ (app-cong mod-on-↣-cong-step₁ ≅ᵗᵐ-refl)
+
+      mod-on-↣-cong-step₃ : mod-on-↣-helper₃ input₁ ≅ᵗᵐ mod-on-↣-helper₃ input₂
+      mod-on-↣-cong-step₃ = ι-cong (mod-natural μ π) mod-on-↣-cong-step₂
+
+      mod-on-↣-cong-step₄ : mod-on-↣-helper₄ input₁ ≅ᵗᵐ mod-on-↣-helper₄ input₂
+      mod-on-↣-cong-step₄ = lam-cong ⟨ μ ∣ T ⟩ mod-on-↣-cong-step₃
+  
+  -- TODO: 
+  mod-on-↣-id : {T : Ty (Γ ,lock⟨ μ ⟩)} → mod-on-↣ (id-trans T) ≅ⁿ id-trans ⟨ μ ∣ T ⟩
+  eq (mod-on-↣-id {T}) {d} {γ} t = 
+    begin 
+      func (mod-on-↣ (id-trans T)) t
+    ≡⟨⟩
+      lam ⟨ μ ∣ T ⟩ (mod-on-↣-helper₃ (id-trans T)) ⟨ d , γ ⟩' $⟨ BaseCategory.hom-id D , ctx-id Γ ⟩ t
+    ≡⟨⟩
+      (mod-on-↣-helper₃ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
+    ≡⟨⟩
+      (ι[ mod-natural μ π ] mod-on-↣-helper₂ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
+    ≡⟨⟩
+      func (to (mod-natural μ π)) (mod-on-↣-helper₂ (id-trans T) ⟨ d , [ γ , t ] ⟩')
+    ≡⟨⟩
+      func (to (mod-natural μ π)) (mod-intro μ ((mod-on-↣-helper₁ (id-trans T)) $ 
+                                                 mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ)) ⟨ d , [ γ , t ] ⟩')
+    ≡⟨⟩
+      func (to (mod-natural μ π)) (mod-intro μ (app (mod-on-↣-helper₁ (id-trans T))
+                                                    (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
+                                               ⟨ d , [ γ , t ] ⟩')
+    ≡⟨⟩
+      func (to (mod-natural μ π)) (mod-intro μ (app (↣-to-⇛ (ty-subst-map (lock-fmap μ π) (id-trans T)))
+                                                    (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
+                                                    ⟨ d , [ γ , t ] ⟩') 
+    ≡⟨ {!   !} ⟩
+      t ∎
+    where open ≡-Reasoning
 
 --------------------------------------------------
 -- Constructing new modalities
@@ -347,9 +403,6 @@ record _≅ᵐ_  {C D} (μ ρ : Modality C D) : Set₁ where
     ⟨ ρ ∣ T ⟩ ∎
     where open ≅ᵗʸ-Reasoning
 
-  {-
-    todo: what does the `{Γ ,lock⟨ μ ⟩}` part mean? 
-  -}
   eq-mod-closed : (A : ClosedTy C) {{_ : IsClosedNatural A}} {Γ : Ctx D} → ⟨ μ ∣ A {Γ ,lock⟨ μ ⟩} ⟩ ≅ᵗʸ ⟨ ρ ∣ A ⟩
   eq-mod-closed A = begin
     ⟨ μ ∣ A ⟩
