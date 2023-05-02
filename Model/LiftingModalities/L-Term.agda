@@ -47,7 +47,7 @@ module _ {T : Ty (lift-ctx Γ)} where
     begin
       lift-ty T ⟪ [ f , g ] , eγ ⟫ (lift-tm t ⟨ [ c₂ , w₂ ] , γ₂ ⟩')
     ≡⟨⟩
-      lift-ty-morˡ T g (eγ-decompnˡ {Γ = Γ} eγ) (lift-ty-morʳ T f refl 
+      lift-ty-morˡ T g (eγ-decompnˡ Γ eγ) (lift-ty-morʳ T f refl 
         (mod-intro μ (t ᵗᵐ⟨ c₂ ⟩ˡ [ to lift-ctx-naturalˡ ]') ⟨ w₂ , γ₂ ⟩'))
     ≡⟨ {!   !} ⟩ -- TODO: USE THE FACT THAT `t` ITSELF IS NATURAL
       mod-intro μ (t ᵗᵐ⟨ c₁ ⟩ˡ [ to lift-ctx-naturalˡ ]') ⟨ w₁ , γ₁ ⟩' 
