@@ -19,6 +19,7 @@ open import Model.Helpers
 -- We only support small base categories with object and morphism types in Set₀.
 -- This is sufficient for the current applications like guarded recursion.
 record BaseCategory : Set₁ where
+  no-eta-equality
   field
     Ob : Set
     Hom : Ob → Ob → Set
