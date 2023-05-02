@@ -69,7 +69,7 @@ module _ (T : Ty (lift-ctx Γ)) where
                                                            lift-ty T ⟪ [ f , hom-id W {w₂} , refl ⟫_
     lift-ty T ⟨ [ m , w₂ ] , Γ ⟪ [ f , hom-id W ] ⟫ γ₂ ⟩ ←----------------------------------------- lift-ty T ⟨ [ n , w₂ ] , γ₂ ⟩
                   |                                                  
-                  | lift-ty T ⟪ [ hom-id ω {m} , g ] , eγ-decompnˡ {Γ = Γ} eγ ⟫_
+                  | lift-ty T ⟪ [ hom-id ω {m} , g ] , eγ-decompnˡ Γ eγ ⟫_
                   ↓ 
     lift-ty T ⟨ [ m , w­₁ ] , γ₁ ⟩
   -}
@@ -78,4 +78,4 @@ module _ (T : Ty (lift-ctx Γ)) where
                 {γ₂ : Γ ⟨ [ n , w₂ ] ⟩} {γ₁ : Γ ⟨ [ m , w₁ ] ⟩} → 
                 Γ ⟪ [ f , g ] ⟫ γ₂ ≡ γ₁ → 
                 lift-ty-obj [ n , w₂ ] γ₂ → lift-ty-obj [ m , w₁ ] γ₁
-  lift-ty-mor f g eγ t = lift-ty-morˡ g (eγ-decompnˡ {Γ = Γ} eγ) (lift-ty-morʳ f t)
+  lift-ty-mor f g eγ t = lift-ty-morˡ g (eγ-decompnˡ Γ eγ) (lift-ty-morʳ f t)

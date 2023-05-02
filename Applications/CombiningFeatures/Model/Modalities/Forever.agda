@@ -551,23 +551,23 @@ _↣_.naturality (from(ty-const-subst {x} T σ δ)) {m} {n} {m≤n} {tt} {tt} {e
 
         restr T x [ const-subst (func σ δ) ] ⟪ m≤n , e-tt ⟫ (id {A = T ⟨ [ n , x ] , func σ δ ⟩} t )
       ≡⟨⟩
-        restr T x ⟪ m≤n , ty-subst-⟪_,_⟫-proof (const-subst (func σ δ)) m≤n tt tt e-tt ⟫ t
-            -- ty-subst-⟪_,_⟫-proof (const-subst (func σ δ)) m≤n tt tt e-tt
+        restr T x ⟪ m≤n , ty-subst-new-proof (const-subst (func σ δ)) m≤n tt tt e-tt ⟫ t
+            -- ty-subst-new-proof (const-subst (func σ δ)) m≤n tt tt e-tt
             -- : (constantly-ctx Γ <at> x) ⟪ m≤n ⟫ (func (const-subst (func σ δ)) tt) ≡ (func (const-subst (func σ δ)) tt)
             -- = constantly-ctx Γ ⟪ [ m≤n , hom-id V {x} ] ⟫ (func σ δ) ≡ (func σ δ)
             -- = Γ ⟪ hom-id V {x} ⟫ (func σ δ) ≡ (func σ δ)
       ≡⟨⟩
-        T ⟪ [ m≤n , hom-id V {x} ] , ty-subst-⟪_,_⟫-proof (const-subst (func σ δ)) m≤n tt tt e-tt ⟫ t
+        T ⟪ [ m≤n , hom-id V {x} ] , ty-subst-new-proof (const-subst (func σ δ)) m≤n tt tt e-tt ⟫ t
       ≡⟨ ty-cong T refl ⟩
-        T ⟪ [ m≤n , hom-id V {x} ] , ty-subst-⟪_,_⟫-proof (constantly-subst σ) [ m≤n , hom-id V {x} ] δ δ (ty-subst-⟪_,_⟫-proof (const-subst δ) m≤n tt tt e-tt) ⟫ t
-            -- ty-subst-⟪_,_⟫-proof (constantly-subst σ) [ m≤n , hom-id V {x} ] δ δ (ty-subst-⟪_,_⟫-proof (const-subst δ) m≤n tt tt e-tt)
+        T ⟪ [ m≤n , hom-id V {x} ] , ty-subst-new-proof (constantly-subst σ) [ m≤n , hom-id V {x} ] δ δ (ty-subst-new-proof (const-subst δ) m≤n tt tt e-tt) ⟫ t
+            -- ty-subst-new-proof (constantly-subst σ) [ m≤n , hom-id V {x} ] δ δ (ty-subst-new-proof (const-subst δ) m≤n tt tt e-tt)
             -- : constantly-ctx Γ ⟪ [ m≤n , hom-id V {x} ] ⟫ (func (constantly-subst σ) δ) ≡ (func (constantly-subst σ) δ)
             -- = Γ ⟪ hom-id V {x} ⟫ (func σ δ) ≡ func σ δ
       ≡⟨⟩
-        T [ constantly-subst σ ] ⟪ [ m≤n , hom-id V {x} ] , ty-subst-⟪_,_⟫-proof (const-subst δ) m≤n tt tt e-tt ⟫ t
+        T [ constantly-subst σ ] ⟪ [ m≤n , hom-id V {x} ] , ty-subst-new-proof (const-subst δ) m≤n tt tt e-tt ⟫ t
       ≡⟨⟩
-        restr (T [ constantly-subst σ ]) x ⟪ m≤n , ty-subst-⟪_,_⟫-proof (const-subst δ) m≤n tt tt e-tt ⟫ t
-            -- ty-subst-⟪_,_⟫-proof (const-subst δ) m≤n tt tt e-tt 
+        restr (T [ constantly-subst σ ]) x ⟪ m≤n , ty-subst-new-proof (const-subst δ) m≤n tt tt e-tt ⟫ t
+            -- ty-subst-new-proof (const-subst δ) m≤n tt tt e-tt 
             -- : (constantly-ctx Δ ⟨at⟩ x) ⟪ m≤n ⟫ (func (const-subst δ) tt) ≡ func (const-subst δ) tt
             -- = constantly-ctx Δ ⟪ [ m≤n, hom-id V {x} ] ⟫ δ ≡ δ
             -- = Δ ⟪ hom-id V {x} ⟫ δ ≡ δ
@@ -626,14 +626,14 @@ _↣_.naturality (from (forever-ty-natural σ {T})) = tm-≅-to-≡ (record { eq
       = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((ι[ ty-const-subst T σ γy ] t) ⟨ m , tt ⟩') ≡ func (to (ty-const-subst T σ γx)) ((forever-ty T) [ σ ] ⟪ g , eγ ⟫ t ⟨ m , tt ⟩')
       = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((convert-term (to (ty-const-subst T σ γy)) t) ⟨ m , tt ⟩') ≡ func (to (ty-const-subst T σ γx)) ((forever-ty T) [ σ ] ⟪ g , eγ ⟫ t ⟨ m , tt ⟩')
       = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) ((forever-ty T) [ σ ] ⟪ g , eγ ⟫ t ⟨ m , tt ⟩')
-      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) ((forever-ty T) ⟪ g , ty-subst-⟪_,_⟫-proof σ g (γy : Δ ⟨ y ⟩) (γx : Δ ⟨ x ⟩) eγ ⟫ t ⟨ m , tt ⟩')
+      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) ((forever-ty T) ⟪ g , ty-subst-new-proof σ g (γy : Δ ⟨ y ⟩) (γx : Δ ⟨ x ⟩) eγ ⟫ t ⟨ m , tt ⟩')
       = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) ((convert-term Ty↣Tx t) ⟨ m , tt ⟩')
             -- Ty↣Tx : restr T y [ const-subst γy ] ↣ restr T x [ const-subst γx ]
-            -- from ⟪ g , ty-subst-⟪_,_⟫-proof σ g δy δx eγ ⟫ t ⟨ m , tt ⟩'
+            -- from ⟪ g , ty-subst-new-proof σ g δy δx eγ ⟫ t ⟨ m , tt ⟩'
       = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) (func Ty↣Tx (t ⟨ m , tt ⟩'))
-      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) (T ⟪ [ ≤-refl {m} , g ] , ty-subst-⟪_,_⟫-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩'))
-      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((id (t ⟨ m , tt ⟩')) ≡ id (T ⟪ [ ≤-refl {m} , g ] , ty-subst-⟪_,_⟫-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩'))
-      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ (t ⟨ m , tt ⟩') ≡ T ⟪ [ ≤-refl {m} , g ] , ty-subst-⟪_,_⟫-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩')
+      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((func (to (ty-const-subst T σ γy)) (t ⟨ m , tt ⟩')) ≡ func (to (ty-const-subst T σ γx)) (T ⟪ [ ≤-refl {m} , g ] , ty-subst-new-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩'))
+      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ ((id (t ⟨ m , tt ⟩')) ≡ id (T ⟪ [ ≤-refl {m} , g ] , ty-subst-new-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩'))
+      = T ⟪ [ ≤-refl {m} , g ] , eγ ⟫ (t ⟨ m , tt ⟩') ≡ T ⟪ [ ≤-refl {m} , g ] , ty-subst-new-proof σ g δy δx eγ ⟫ (t ⟨ m , tt ⟩')
       = ty-cong T refl
   -}
 func (to (forever-ty-natural σ {T})) {γ = γ} = ι⁻¹[ ty-const-subst T σ γ ]_

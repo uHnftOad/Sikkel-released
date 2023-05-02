@@ -257,33 +257,37 @@ module _ (μ : Modality C D) {Γ : Ctx D}  where
       mod-on-↣-cong-step₄ : mod-on-↣-helper₄ input₁ ≅ᵗᵐ mod-on-↣-helper₄ input₂
       mod-on-↣-cong-step₄ = lam-cong ⟨ μ ∣ T ⟩ mod-on-↣-cong-step₃
   
-  -- TODO: 
-  mod-on-↣-id : {T : Ty (Γ ,lock⟨ μ ⟩)} → mod-on-↣ (id-trans T) ≅ⁿ id-trans ⟨ μ ∣ T ⟩
-  eq (mod-on-↣-id {T}) {d} {γ} t = 
-    begin 
-      func (mod-on-↣ (id-trans T)) t
-    ≡⟨⟩
-      lam ⟨ μ ∣ T ⟩ (mod-on-↣-helper₃ (id-trans T)) ⟨ d , γ ⟩' $⟨ BaseCategory.hom-id D , ctx-id Γ ⟩ t
-    ≡⟨⟩
-      (mod-on-↣-helper₃ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
-    ≡⟨⟩
-      (ι[ mod-natural μ π ] mod-on-↣-helper₂ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
-    ≡⟨⟩
-      func (to (mod-natural μ π)) (mod-on-↣-helper₂ (id-trans T) ⟨ d , [ γ , t ] ⟩')
-    ≡⟨⟩
-      func (to (mod-natural μ π)) (mod-intro μ ((mod-on-↣-helper₁ (id-trans T)) $ 
-                                                 mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ)) ⟨ d , [ γ , t ] ⟩')
-    ≡⟨⟩
-      func (to (mod-natural μ π)) (mod-intro μ (app (mod-on-↣-helper₁ (id-trans T))
-                                                    (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
-                                               ⟨ d , [ γ , t ] ⟩')
-    ≡⟨⟩
-      func (to (mod-natural μ π)) (mod-intro μ (app (↣-to-⇛ (ty-subst-map (lock-fmap μ π) (id-trans T)))
-                                                    (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
-                                                    ⟨ d , [ γ , t ] ⟩') 
-    ≡⟨ {!   !} ⟩
-      t ∎
-    where open ≡-Reasoning
+  {-
+    mod-on-↣-id : {T : Ty (Γ ,lock⟨ μ ⟩)} → mod-on-↣ (id-trans T) ≅ⁿ id-trans ⟨ μ ∣ T ⟩
+    eq (mod-on-↣-id {T}) {d} {γ} t = {!   !}
+      where
+        open ≡-Reasoning
+        mod-on-↣-id₁ : 
+      begin 
+        func (mod-on-↣ (id-trans T)) t
+      ≡⟨⟩
+        lam ⟨ μ ∣ T ⟩ (mod-on-↣-helper₃ (id-trans T)) ⟨ d , γ ⟩' $⟨ BaseCategory.hom-id D , ctx-id Γ ⟩ t
+      ≡⟨⟩
+        (mod-on-↣-helper₃ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
+      ≡⟨⟩
+        (ι[ mod-natural μ π ] mod-on-↣-helper₂ (id-trans T)) ⟨ d , [ γ , t ] ⟩'
+      ≡⟨⟩
+        func (to (mod-natural μ π)) (mod-on-↣-helper₂ (id-trans T) ⟨ d , [ γ , t ] ⟩')
+      ≡⟨⟩
+        func (to (mod-natural μ π)) (mod-intro μ ((mod-on-↣-helper₁ (id-trans T)) $ 
+                                                  mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ)) ⟨ d , [ γ , t ] ⟩')
+      ≡⟨⟩
+        func (to (mod-natural μ π)) (mod-intro μ (app (mod-on-↣-helper₁ (id-trans T))
+                                                      (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
+                                                ⟨ d , [ γ , t ] ⟩')
+      ≡⟨⟩
+        func (to (mod-natural μ π)) (mod-intro μ (app (↣-to-⇛ (ty-subst-map (lock-fmap μ π) (id-trans T)))
+                                                      (mod-elim μ (ι⁻¹[ mod-natural μ π ] ξ))) 
+                                                      ⟨ d , [ γ , t ] ⟩') 
+      ≡⟨ {!   !} ⟩
+        t ∎
+  -}
+
 
 --------------------------------------------------
 -- Constructing new modalities

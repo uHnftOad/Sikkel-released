@@ -317,7 +317,7 @@ _↣_.naturality (from (forever-constantly-tyʳ T)) = trans (sym (ty-comp T))
     forever-ty (constantly-ty T) ⟨ x , γx ⟩ ←--------------------- forever-ty (constantly-ty T) ⟨ y , γy ⟩ ∋ tm
                                        forever-ty (constantly-ty T) ⟪ f , eγ ⟫_
 
-                    T ⟪ f , ty-subst-⟪_,_⟫-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
+                    T ⟪ f , ty-subst-new-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
             T ⟨ x , γx ⟩ ←------------------------------------------------------ T ⟨ y , γy ⟩
                  ↑                                                                      ↑
     func (T ↣ S) |                                                                      | func (T ↣ S)
@@ -328,7 +328,7 @@ _↣_.naturality (from (forever-constantly-tyʳ T)) = trans (sym (ty-comp T))
 
     Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟨ x , γx : Γ ⟨ x ⟩ ⟩ = T ⟨ x , func (to (now-constantly-ctx Γ)) γx ⟩ = T ⟨ x , γx ⟩
     Γ ⊢ forever-ty (constantly-ty T) ⟨ x , γx ⟩ = Tm ◇ (restr (constantly-ty T) x [ const-subst γx ]) 
-    Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟪ f , eγ ⟫_ = T ⟪ f , ty-subst-⟪_,_⟫-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
+    Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟪ f , eγ ⟫_ = T ⟪ f , ty-subst-new-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
     Γ ⊢ forever-ty (constantly-ty T) ⟪ f , eγ ⟫ tm = convert-term Ty↣Tx tm
                                                     with `func Ty↣Tx {m} {tt} = constantly-ty T ⟪ [ m≤m , f ] , eγ ⟫_ = T ⟪ f , new-proof ⟫_`
 
@@ -338,7 +338,7 @@ _↣_.naturality (from (forever-constantly-tyʳ T)) = trans (sym (ty-comp T))
 
       T [ to (now-constantly-ctx Γ) ] ⟪ f , eγ ⟫ (func (T ↣ S) tm)
     ≣⟨⟩
-      T ⟪ f , ty-subst-⟪_,_⟫-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫ (func (T ↣ S) {y} {γy} tm)
+      T ⟪ f , ty-subst-new-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫ (func (T ↣ S) {y} {γy} tm)
     ≣⟨⟩
       T ⟪ f , _ ⟫ (T ⟪ hom-id V {y} , _ ⟫ (tm ⟨ _ , tt ⟩'))
     ≣˘⟨ ty-comp T ⟩
@@ -403,7 +403,7 @@ _↣_.naturality (to (forever-constantly-tyʳ T)) = tm-≅-to-≡ (record { eq =
     Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟨ x , γx ⟩ = T ⟨ x , func (to (now-constantly-ctx Γ)) γx ⟩ = T ⟨ x , γx ⟩
     Γ ⊢ forever-ty (constantly-ty T) ⟨ x , γx ⟩ = Tm ◇ (restr (constantly-ty T) x [ const-subst γx ]) 
 
-    Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟪ f , eγ ⟫_ = T ⟪ f , ■ = ty-subst-⟪_,_⟫-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
+    Γ ⊢ T [ to (now-constantly-ctx Γ) ] ⟪ f , eγ ⟫_ = T ⟪ f , ■ = ty-subst-new-proof (to (now-constantly-ctx Γ)) f γy γx eγ ⟫_
     Γ ⊢ forever-ty (constantly-ty T) ⟪ f , eγ ⟫ t = convert-term Ty↣Tx t : Tm ◇ (restr (constantly-ty T) x [ const-subst γx ])
     ◇ ⊢ forever-ty (constantly-ty T) ⟪ f , eγ ⟫ t ⟨ m , tt ⟩' = func Ty↣Tx {m} {tt} (t ⟨ m , tt ⟩')
                                                                = constantly-ty T ⟪ [ m≤m , f ] , eγ ⟫ (t ⟨ m , tt ⟩')

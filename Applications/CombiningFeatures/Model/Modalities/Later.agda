@@ -236,7 +236,7 @@ ty-comp (▻ T) {f = [ s≤s k≤m , _ ]} {g = [ s≤s m≤n , _ ]} = ty-comp T
                                                    ... ✲m ←  ... 
                                                       ∕
     ▻' T ⟪ [ m+1≤n+1 , g ] , eγ ⟫_                  ∕   
-  = T ⟪ [ m≤n , g ] , ty-subst-⟪_,_⟫-proof ... ⟫_ ∕ 
+  = T ⟪ [ m≤n , g ] , ty-subst-new-proof ... ⟫_ ∕ 
                                                ↙ 
                                          ... ✲n ← ... 
 
