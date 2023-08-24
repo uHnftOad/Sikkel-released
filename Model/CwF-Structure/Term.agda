@@ -35,6 +35,11 @@ record Tm (Γ : Ctx C) (T : Ty Γ) : Set where
     term : (x : Ob) (γ : Γ ⟨ x ⟩) → T ⟨ x , γ ⟩
     naturality : ∀ {x y} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} (f : Hom x y) (eγ : Γ ⟪ f ⟫ γy ≡ γx) →
                  T ⟪ f , eγ ⟫ (term y γy) ≡ term x γx
+      {-
+        T ⟨ x , γx ⟩ <---------------------- T ⟨ y , γy ⟩
+                           T ⟪ f , eγ ⟫_
+        t ⟨ x , γx ⟩' <--------------------| t ⟨ y , γy ⟩'
+      -}
 open Tm public renaming (term to infix 15 _⟨_,_⟩')
 
 private
@@ -80,7 +85,7 @@ module ≅ᵗᵐ-Reasoning where
   _∎ : ∀ (t : Tm Γ T) → t ≅ᵗᵐ t
   _∎ _ = ≅ᵗᵐ-refl
 
-  syntax step-≅  t1 t2≅t3 t1≅t2 = t1 ≅⟨  t1≅t2 ⟩ t2≅t3
+  syntax step-≅  t1 t2≅t3 t1≅t2 = t1 ≅⟨ t1≅t2 ⟩ t2≅t3
   syntax step-≅˘ t1 t2≅t3 t2≅t1 = t1 ≅˘⟨ t2≅t1 ⟩ t2≅t3
 
 -- Equivalence of terms implies equality of terms (only works because eta-equality for Tm is enabled).

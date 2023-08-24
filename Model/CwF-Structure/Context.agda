@@ -65,6 +65,18 @@ module _ {C : BaseCategory} where
     field
       func : ∀ {x} → Δ ⟨ x ⟩ → Γ ⟨ x ⟩
       naturality : ∀ {x y} {f : Hom x y} {δ : Δ ⟨ y ⟩} → Γ ⟪ f ⟫ (func δ) ≡ func (Δ ⟪ f ⟫ δ)
+        {-
+                             f
+                   x ------------------> y
+
+          (2)            Δ ⟪ f ⟫_
+               Δ ⟨ x ⟩ <------------ Δ ⟨ y ⟩ ∋ δ
+                   ∣                    ∣
+          func {x} ∣                    ∣ func {y}
+                   ↓                    ↓
+               Γ ⟨ x ⟩ <------------ Γ ⟨ y ⟩
+                          Γ ⟪ f ⟫_           (1)
+        -}
   open _⇒_ public
 
   id-subst : (Γ : Ctx C) → Γ ⇒ Γ

@@ -134,6 +134,17 @@ record _↣_ {Γ : Ctx C} (T : Ty Γ) (S : Ty Γ) : Set where
     func : ∀ {x} {γ} → T ⟨ x , γ ⟩ → S ⟨ x , γ ⟩
     naturality : ∀ {x y} {f : Hom x y} {γy : Γ ⟨ y ⟩} {γx : Γ ⟨ x ⟩} {eγ : Γ ⟪ f ⟫ γy ≡ γx} {t : T ⟨ y , γy ⟩} →
                  S ⟪ f , eγ ⟫ (func t) ≡ func (T ⟪ f , eγ ⟫ t)
+      {-
+                            T ⟪ f , eγ ⟫_
+          T ⟨ x , γx ⟩ <---------------------- T ⟨ y , γy ⟩ ∋ t
+                 |                                    |
+        func {x} |                                    | func {y}
+                 ↓                                    ↓
+          S ⟨ x , γx ⟩ <---------------------- S ⟨ y , γy ⟩
+                            S ⟪ f , eγ ⟫_
+
+      -}
+
 open _↣_ public
 
 record _≅ⁿ_ {Γ : Ctx C} {T : Ty Γ} {S : Ty Γ} (η φ : T ↣ S) : Set where
@@ -294,10 +305,10 @@ module ≅ᵗʸ-Reasoning where
 
 _[_] : Ty Γ → Δ ⇒ Γ → Ty Δ
 T [ σ ] ⟨ x , δ ⟩ = T ⟨ x , func σ δ ⟩
-_⟪_,_⟫_ (_[_] {Γ = Γ} T σ) f {δy}{δx} eγ-yx t = T ⟪ f , proof ⟫ t
-  where
-    proof : Γ ⟪ f ⟫ func σ δy ≡ func σ δx
-    proof = trans (naturality σ) (cong (func σ) eγ-yx)
+_⟪_,_⟫_ (_[_] {Γ = Γ} T σ) f {δy}{δx} eγ-yx t = T ⟪ f , trans (naturality σ) (cong (func σ) eγ-yx) ⟫ t
+  -- where
+  --   proof : Γ ⟪ f ⟫ func σ δy ≡ func σ δx
+  --   proof = trans (naturality σ) (cong (func σ) eγ-yx)
 ty-cong (T [ σ ]) f = ty-cong T f
 ty-id (T [ σ ]) = strong-ty-id T
 ty-comp (T [ σ ]) = strong-ty-comp T

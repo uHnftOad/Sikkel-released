@@ -68,7 +68,7 @@ naturality (◅-tm t) m≤n eγ = naturality t (s≤s m≤n) eγ
 -}
 
 from-earlier : (Γ : Ctx ω) → ◄ Γ ⇒ Γ
-func (from-earlier Γ) = Γ ⟪ n≤1+n _ ⟫_
+func (from-earlier Γ) {n} t = Γ ⟪ n≤1+n n ⟫ t
 naturality (from-earlier Γ) = ctx-m≤1+n Γ
 
 

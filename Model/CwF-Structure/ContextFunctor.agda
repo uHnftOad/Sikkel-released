@@ -14,6 +14,8 @@ private
   variable
     C D : BaseCategory
 
+infix 1 _≅ᶜᶠ_
+
 
 --------------------------------------------------
 -- Definition of functors between context categories
@@ -102,6 +104,17 @@ record CtxNatTransf (Φ Ψ : CtxFunctor C D) : Set₁ where
     naturality : ∀ {Δ Γ} (σ : Δ ⇒ Γ) → transf-op Γ ⊚ ctx-fmap Φ σ ≅ˢ ctx-fmap Ψ σ ⊚ transf-op Δ
 
 open CtxNatTransf public
+
+-- Natural isomorphisms between context functors
+record _≅ᶜᶠ_ (Φ Ψ : CtxFunctor C D) : Set₁ where
+  no-eta-equality
+  field
+    from : CtxNatTransf Φ Ψ
+    to : CtxNatTransf Ψ Φ
+    isoˡ : {Γ : Ctx C} → transf-op to Γ ⊚ transf-op from Γ ≅ˢ id-subst (ctx-op Φ Γ)
+    isoʳ : {Γ : Ctx C} → transf-op from Γ ⊚ transf-op to Γ ≅ˢ id-subst (ctx-op Ψ Γ)
+
+open _≅ᶜᶠ_ public
 
 id-ctx-transf : (Φ : CtxFunctor C D) → CtxNatTransf Φ Φ
 transf-op (id-ctx-transf Φ) Γ = id-subst (ctx-op Φ Γ)
